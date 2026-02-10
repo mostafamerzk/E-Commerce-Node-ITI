@@ -75,26 +75,13 @@ E-Commerce/
 | **Middleware — Authorization** | ✅ Done | Role-based access control                                                                                 |
 | **Middleware — Validation**    | ✅ Done | Joi schema validation                                                                                     |
 | **Utils**                      | ✅ Done | email, encryption, hashing, multer/Cloudinary, OTP, token, error handling                                 |
-
----
-
-## 🔲 Phase 0 — All Models (Built Together First)
-
-> **Everyone creates their models first** so all schemas are available from day one. No one is blocked.
-
-| Model        | File                        | Created By | Fields                                                                                                                                                                           |
-| ------------ | --------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Category** | `src/DB/Models/category.js` | Mostafa    | `name`, `slug`, `image`, `parentCategoryId`, `createdBy`                                                                                                                         |
-| **Product**  | `src/DB/Models/product.js`  | Mostafa    | `title`, `description`, `slug`, `price`, `discount`, `finalPrice`, `stock`, `images[]`, `mainImage`, `categoryId`, `sellerId/createdBy`, `avgRating`, `ratingCount`, `isDeleted` |
-| **Cart**     | `src/DB/Models/cart.js`     | Fathi      | `userId`, `products: [{ productId, quantity, price }]`, `totalPrice`                                                                                                             |
-| **Order**    | `src/DB/Models/order.js`    | Fathi      | `userId`, `products: [{ productId, title, quantity, unitPrice }]`, `totalPrice`, `shippingAddress`, `paymentMethod`, `paymentStatus`, `orderStatus`, `orderNumber`               |
-| **Review**   | `src/DB/Models/review.js`   | Mokhtar    | `userId`, `productId`, `rating` (1–5), `comment`, `createdAt`                                                                                                                    |
-| **Banner**   | `src/DB/Models/banner.js`   | Issac      | `title`, `image`, `link`, `isActive`, `order`, `createdBy`                                                                                                                       |
-
-- [x] All models created and committed
-- [x] Add `seller` role to User model roles enum
-- [x] Add `wishlist: [ObjectId → Product]` to User model
-- [x] Add `phone`, `address` fields to User model
+| **Category Model**             | ✅ Done | `name`, `slug`, `image`, `parentCategoryId`, `createdBy`                                                  |
+| **Product Model**              | ✅ Done | `title`, `slug`, `price`, `stock`, `images`, `sellerId`, `avgRating`, `isDeleted`                         |
+| **Cart Model**                 | ✅ Done | `userId`, `products`, `totalPrice`                                                                        |
+| **Order Model**                | ✅ Done | `userId`, `products`, `shippingAddress`, `paymentStatus`, `orderStatus`                                   |
+| **Review Model**               | ✅ Done | `userId`, `productId`, `rating`, `comment`                                                                |
+| **Banner Model**               | ✅ Done | `title`, `image`, `link`, `isActive`, `createdBy`                                                         |
+| **User Model Updates**         | ✅ Done | Added `seller` role, `wishlist`, `phone`, `address`                                                       |
 
 ---
 
@@ -183,7 +170,7 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 
 ### 👤 Mokhtar — Wishlist + Reviews & Ratings
 
-> Simple standalone CRUD modules. No other module depends on these.
+> Standalone CRUD modules. Independent of other core flows.
 
 #### Wishlist & Favorites
 
@@ -206,7 +193,7 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 
 ### 👤 Issac — Admin Panel + Seller Management
 
-> Dashboard & management features. Reads from other models but **nobody depends on Admin or Seller**. Can be done at the end.
+> Dashboard & management features. Independent of core user flows.
 
 #### Admin Panel
 
@@ -247,7 +234,6 @@ graph TD
 >
 > 1. **Phase 0** — everyone creates their models together, no blocking
 > 2. After models are ready, all four developers work **in parallel** on their domains
-> 3. **Mokhtar & Issac** have the easiest tasks and no one depends on their modules
 
 ---
 
