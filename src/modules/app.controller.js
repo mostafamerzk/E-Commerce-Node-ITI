@@ -1,11 +1,12 @@
 import { globalHandler } from "../utils/error handling/globalHandler.js";
 import authRouter from "./auth/auth.controller.js";
 import userRouter from "./User/user.controller.js";
+import { adminRoutes } from "./admin/admin.controller.js";
 import cors from "cors";
 const bootstrap = async (app, express) => {
   app.use(cors());
   app.use(express.json());
-
+  app.use("/admin", adminRoutes);
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
   // not found route
