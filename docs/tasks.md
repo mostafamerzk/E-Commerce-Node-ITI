@@ -197,10 +197,10 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 
 #### Admin Panel
 
-- [ ] GET `/admin/users` — list all users (with pagination, search)
-- [ ] PATCH `/admin/users/:userId/restrict` — soft-delete / restrict user
-- [ ] PATCH `/admin/users/:userId/approve` — re-approve user
-- [ ] GET `/admin/products` — list all products (with filters)
+- [X] GET `/admin/users` — list all users (with pagination, search)
+- [X] PATCH `/admin/users/:userId/restrict` — soft-delete / restrict user
+- [X] PATCH `/admin/users/:userId/approve` — re-approve user
+- [X] GET `/admin/products` — list all products (with filters)
 - [ ] DELETE `/admin/products/:productId` — remove a product
 - [ ] GET `/admin/orders` — list all orders (with filters, status)
 - [ ] PATCH `/admin/orders/:orderId` — update order/shipping status
