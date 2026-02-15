@@ -2,6 +2,7 @@ export const roles = {
   user: "user",
   admin: "admin",
   seller: "seller",
+  guest: "guest",
 };
 
 export const providers = {
