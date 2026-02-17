@@ -100,8 +100,8 @@ Built with ❤️ by the **ITI Node.js E-Commerce Team**:
 
 - **Mostafa**: Product Management, Categories, & Payment Integration
 - **Fathi**: Shopping Cart, Checkout, & Order Management
-- **Mokhtar**: Wishlist & Seller Management
-- **Issac**: Admin Dashboard & Reviews System
+- **Mokhtar**: Wishlist & Reviews System
+- **Issac**: Admin Dashboard & Seller Management
 
 ### 🎓 Supervisor
 

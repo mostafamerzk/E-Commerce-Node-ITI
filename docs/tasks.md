@@ -104,27 +104,19 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] DELETE `/category/:categoryId` — delete category (admin only)
 - [ ] Validation schemas for category
 
-#### Checkout
+#### Product ⭐
 
-- [ ] POST `/checkout` — order summary with price breakdown (subtotal, shipping, tax, total)
-- [ ] Guest checkout option (allow checkout without auth, capture email)
-- [ ] Multiple payment method selection (Credit Card, PayPal, COD, Wallet)
-- [ ] _(bonus)_ Apply promo codes & discounts → validate promo code, calculate discount
-
-#### Order ⭐
-
-- [ ] POST `/order` — place a new order
-  - [ ] Validate cart / product availability
-  - [ ] Deduct stock from Product model
-  - [ ] Clear user's cart after successful order
-  - [ ] Generate unique order number (e.g. using `nanoid`)
-  - [ ] Set initial `orderStatus: 'pending'`
-- [ ] GET `/order` — get user's orders (list with pagination)
-- [ ] GET `/order/:orderId` — get single order details
-- [ ] PATCH `/order/:orderId/cancel` — cancel order (user, only if `pending` or `confirmed`)
-  - [ ] Restore stock on cancellation
-- [ ] Send **order confirmation email** to user (using existing email utils)
-- [ ] Send email on **status change** (shipped, delivered, cancelled)
+- [ ] POST `/product` — create product (seller/admin)
+- [ ] GET `/product` — list all products
+- [ ] GET `/product/:productId` — get single product (with reviews populated)
+- [ ] PATCH `/product/:productId` — update product (owner/admin)
+- [ ] DELETE `/product/:productId` — soft-delete product (owner/admin)
+- [ ] **Search** — GET `/product?search=keyword` (search by name)
+- [ ] **Filtration** — GET `/product?minPrice=&maxPrice=&categoryId=` (filter by price, category)
+- [ ] **Sorting** — GET `/product?sort=price,-createdAt`
+- [ ] **Pagination** — GET `/product?page=1&limit=10`
+- [ ] Product image upload (main + gallery) via Cloudinary
+- [ ] Validation schemas for product
 
 #### Payment Integration
 
@@ -152,23 +144,31 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] Validate stock availability before adding to cart
 - [ ] Validation schemas for cart
 
-#### Product ⭐
+#### Checkout
 
-- [ ] POST `/product` — create product (seller/admin)
-- [ ] GET `/product` — list all products
-- [ ] GET `/product/:productId` — get single product (with reviews populated)
-- [ ] PATCH `/product/:productId` — update product (owner/admin)
-- [ ] DELETE `/product/:productId` — soft-delete product (owner/admin)
-- [ ] **Search** — GET `/product?search=keyword` (search by name)
-- [ ] **Filtration** — GET `/product?minPrice=&maxPrice=&categoryId=` (filter by price, category)
-- [ ] **Sorting** — GET `/product?sort=price,-createdAt`
-- [ ] **Pagination** — GET `/product?page=1&limit=10`
-- [ ] Product image upload (main + gallery) via Cloudinary
-- [ ] Validation schemas for product
+- [ ] POST `/checkout` — order summary with price breakdown (subtotal, shipping, tax, total)
+- [ ] Guest checkout option (allow checkout without auth, capture email)
+- [ ] Multiple payment method selection (Credit Card, PayPal, COD, Wallet)
+- [ ] _(bonus)_ Apply promo codes & discounts → validate promo code, calculate discount
+
+#### Order ⭐
+
+- [ ] POST `/order` — place a new order
+  - [ ] Validate cart / product availability
+  - [ ] Deduct stock from Product model
+  - [ ] Clear user's cart after successful order
+  - [ ] Generate unique order number (e.g. using `nanoid`)
+  - [ ] Set initial `orderStatus: 'pending'`
+- [ ] GET `/order` — get user's orders (list with pagination)
+- [ ] GET `/order/:orderId` — get single order details
+- [ ] PATCH `/order/:orderId/cancel` — cancel order (user, only if `pending` or `confirmed`)
+  - [ ] Restore stock on cancellation
+- [ ] Send **order confirmation email** to user (using existing email utils)
+- [ ] Send email on **status change** (shipped, delivered, cancelled)
 
 ---
 
-### 👤 Mokhtar — Wishlist + Seller Management
+### 👤 Mokhtar — Wishlist + Reviews & Ratings
 
 > Standalone CRUD modules. Independent of other core flows.
 
@@ -180,6 +180,34 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] Prevent duplicate products in wishlist
 - [ ] Validation schemas for wishlist
 
+#### Reviews & Ratings
+
+- [ ] POST `/review/:productId` — add review (one review per user per product)
+- [ ] GET `/review/:productId` — get all reviews for a product (with pagination)
+- [ ] PATCH `/review/:reviewId` — update own review
+- [ ] DELETE `/review/:reviewId` — delete own review
+- [ ] Update `avgRating` and `ratingCount` on Product model when review is added/updated/deleted
+- [ ] Validation schemas for review
+
+---
+
+### 👤 Issac — Admin Panel + Seller Management
+
+> Dashboard & management features. Independent of core user flows.
+
+#### Admin Panel
+
+- [X] GET `/admin/users` — list all users (with pagination, search)
+- [X] PATCH `/admin/users/:userId/restrict` — soft-delete / restrict user
+- [X] PATCH `/admin/users/:userId/approve` — re-approve user
+- [X] GET `/admin/products` — list all products (with filters)
+- [ ] DELETE `/admin/products/:productId` — remove a product
+- [ ] GET `/admin/orders` — list all orders (with filters, status)
+- [ ] PATCH `/admin/orders/:orderId` — update order/shipping status
+  - [ ] Validate status transition (e.g., can't go from `delivered` → `processing`)
+- [ ] CRUD `/admin/banners` — content management for homepage banners
+- [ ] _(bonus)_ CRUD `/admin/promo` — discount & promo-code management
+
 #### Seller (Vendor) Management
 
 - [ ] Add seller-specific fields to User model (OR create separate Seller profile model): `storeName`, `storeDescription`, `storeImage`
@@ -189,34 +217,6 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] GET `/seller/products` — seller's own product listings
 - [ ] GET `/seller/inventory` — stock/inventory overview
 - [ ] _(bonus)_ GET `/seller/orders` — seller's received orders with status updates
-
----
-
-### 👤 Issac — Admin Panel + Reviews & Ratings
-
-> Dashboard & management features. Independent of core user flows.
-
-#### Admin Panel
-
-- [x] GET `/admin/users` — list all users (with pagination, search)
-- [x] PATCH `/admin/users/:userId/restrict` — soft-delete / restrict user
-- [x] PATCH `/admin/users/:userId/approve` — re-approve user
-- [x] GET `/admin/products` — list all products (with filters)
-- [ ] DELETE `/admin/products/:productId` — remove a product
-- [ ] GET `/admin/orders` — list all orders (with filters, status)
-- [ ] PATCH `/admin/orders/:orderId` — update order/shipping status
-  - [ ] Validate status transition (e.g., can't go from `delivered` → `processing`)
-- [ ] CRUD `/admin/banners` — content management for homepage banners
-- [ ] _(bonus)_ CRUD `/admin/promo` — discount & promo-code management
-
-#### Reviews & Ratings
-
-- [ ] POST `/review/:productId` — add review (one review per user per product)
-- [ ] GET `/review/:productId` — get all reviews for a product (with pagination)
-- [ ] PATCH `/review/:reviewId` — update own review
-- [ ] DELETE `/review/:reviewId` — delete own review
-- [ ] Update `avgRating` and `ratingCount` on Product model when review is added/updated/deleted
-- [ ] Validation schemas for review
 
 ---
 
