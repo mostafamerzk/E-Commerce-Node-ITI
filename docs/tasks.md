@@ -168,7 +168,7 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 
 ---
 
-### 👤 Mokhtar — Wishlist + Reviews & Ratings
+### 👤 Mokhtar — Wishlist + Seller Management
 
 > Standalone CRUD modules. Independent of other core flows.
 
@@ -180,18 +180,19 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] Prevent duplicate products in wishlist
 - [ ] Validation schemas for wishlist
 
-#### Reviews & Ratings
+#### Seller (Vendor) Management
 
-- [ ] POST `/review/:productId` — add review (one review per user per product)
-- [ ] GET `/review/:productId` — get all reviews for a product (with pagination)
-- [ ] PATCH `/review/:reviewId` — update own review
-- [ ] DELETE `/review/:reviewId` — delete own review
-- [ ] Update `avgRating` and `ratingCount` on Product model when review is added/updated/deleted
-- [ ] Validation schemas for review
+- [ ] Add seller-specific fields to User model (OR create separate Seller profile model): `storeName`, `storeDescription`, `storeImage`
+- [ ] Seller registration & profile setup
+- [ ] GET `/seller/profile` — seller own profile
+- [ ] PATCH `/seller/profile` — update seller profile
+- [ ] GET `/seller/products` — seller's own product listings
+- [ ] GET `/seller/inventory` — stock/inventory overview
+- [ ] _(bonus)_ GET `/seller/orders` — seller's received orders with status updates
 
 ---
 
-### 👤 Issac — Admin Panel + Seller Management
+### 👤 Issac — Admin Panel + Reviews & Ratings
 
 > Dashboard & management features. Independent of core user flows.
 
@@ -208,15 +209,14 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] CRUD `/admin/banners` — content management for homepage banners
 - [ ] _(bonus)_ CRUD `/admin/promo` — discount & promo-code management
 
-#### Seller (Vendor) Management
+#### Reviews & Ratings
 
-- [ ] Add seller-specific fields to User model (OR create separate Seller profile model): `storeName`, `storeDescription`, `storeImage`
-- [ ] Seller registration & profile setup
-- [ ] GET `/seller/profile` — seller own profile
-- [ ] PATCH `/seller/profile` — update seller profile
-- [ ] GET `/seller/products` — seller's own product listings
-- [ ] GET `/seller/inventory` — stock/inventory overview
-- [ ] _(bonus)_ GET `/seller/orders` — seller's received orders with status updates
+- [ ] POST `/review/:productId` — add review (one review per user per product)
+- [ ] GET `/review/:productId` — get all reviews for a product (with pagination)
+- [ ] PATCH `/review/:reviewId` — update own review
+- [ ] DELETE `/review/:reviewId` — delete own review
+- [ ] Update `avgRating` and `ratingCount` on Product model when review is added/updated/deleted
+- [ ] Validation schemas for review
 
 ---
 
