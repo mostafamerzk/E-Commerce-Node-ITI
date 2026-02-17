@@ -81,11 +81,11 @@ export const getUserById = async (req, res) => {
  * // Response: { message: "user found", data: { _id: "...", userName: "alice123", email: "alice@example.com", ... } }
  * // Error: { message: "user not found" }
  */
-export const getUserbyEmail = async (req, res) => {
+export const getUserbyEmail = async (req, res, next) => {
     const {email} = req.params;
-    const user = await User.findOne({email});
+    const user = await User.findOne({email: email});
     if (!user) {
-        return res.status(404).json({message:"user not found"}) 
+        return next(new Error("user not found"));
     }   
     return res.status(200).json({message:"user found",data:user})
 }
@@ -111,11 +111,11 @@ export const getUserbyEmail = async (req, res) => {
  * // Response: { message: "user restricted", data: { _id: "...", isDeleted: true, ... } }
  * // Error: { message: "user not found" }
  */
-export const restrictUser = async (req, res) => {
+export const restrictUser = async (req, res,next) => {
     const {id} = req.params;
-    const user = await User.findByIdAndUpdate(id,{isDeleted:true},{new:true});
+    const user = await User.findByIdAndUpdate(id,{isDeleted:true},{new:true}).lean("-password");
     if (!user) {
-        return res.status(404).json({message:"user not found"}) 
+        return next(new Error("user not found"));
     }   
     return res.status(200).json({message:"user restricted",data:user})
 }
@@ -161,12 +161,11 @@ export const getProductById = async (req, res) => {
     return res.status(200).json({message:"product found",data:product})
 }
 
-export const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res,next) => {
     const {id} = req.params;
-    const product = await Product.findByIdAndDelete(id);
-    console.log(product);
+    const product = await Product.findByIdAndUpdate(id,{isDeleted:true},{new:true});    // console.log(product);
     if (!product) {
-        return res.status(404).json({message:"product not found"}) 
+        return next(new Error("product not found"));
     }
-    return res.status(200).json({message:"product deleted",data:product})
+    return res.status(200).json({success:true, message:"product deleted",data:product})
 }

@@ -23,6 +23,11 @@ const reviewSchema = new mongoose.Schema(
       trim: true,
       maxlength: [1000, "comment must be at most 1000 characters"],
     },
+    parentComment:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Reviews",
+      default: null
+    }
   },
   { timestamps: true },
 );
