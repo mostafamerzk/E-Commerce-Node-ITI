@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { isValidObjectId } from "../../middleware/validation.middleware";
+import { isValidObjectId } from "../../middleware/validation.middleware.js";
 
 export const addCartItemSchema = Joi.object({
     productId: Joi.string()
