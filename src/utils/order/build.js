@@ -20,7 +20,7 @@ export const sortObject = (sortParam) => {
         oldest: { createdAt: 1 },
         totalHigh: { totalAmount: -1 },
         totalLow: { totalAmount: 1 },
-        orderStatus: { status: 1 }
+        status: { orderStatus: 1 }
     };
 
     return sortOptions[sortParam] || { createdAt: -1 };
