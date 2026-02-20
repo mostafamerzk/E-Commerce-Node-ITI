@@ -1,4 +1,4 @@
-import Joi, { number } from "joi";
+import Joi from "joi";
 import { isValidObjectId } from "../../middleware/validation.middleware.js";
 
 export const addReviewSchema = Joi.object({
