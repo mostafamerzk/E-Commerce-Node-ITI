@@ -26,9 +26,7 @@ export const addReview = async (req, res, next) => {
     await updateProductRating(productId);
     res.status(201).json({
         status: "Review added successfully",
-        data: {
-            review
-        }
+        review: review
     });
 };
 
@@ -43,7 +41,7 @@ export const getProductReviews = async (req, res, next) => {
     const reviews = await Review.paginate(filter,options)    
     res.status(200).json({
         message: "reviews fetched successfully",
-        data: {
+        reviews: {
             reviews,
             pages: options.pages,
             page: options.page,
@@ -75,9 +73,7 @@ export const updateReview = async (req, res, next) => {
 
     res.status(200).json({
         message: "Review updated successfully",
-        data: {
-            review
-        }
+        review: review
     });
 };  
 
@@ -101,6 +97,5 @@ export const deleteReview = async (req, res, next) => {
 
     res.status(200).json({
         message: "Review deleted successfully",
-        data: null
     });
 };

@@ -11,7 +11,6 @@
   {
     "rating": 5, // Required, min: 1, max: 5
     "comment": "Great product!", // Optional, max: 1000 chars
-    "parentComment": "64f..." // Optional, ID of parent review
   }
   ```
 - **Success Response (201 Created)**:
