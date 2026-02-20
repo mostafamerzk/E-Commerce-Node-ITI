@@ -1,8 +1,9 @@
+export const isAuthorized = (...roles) => {
+  return (req, res, next) => {
+    // console.log(req.user.role);
 
-export const  isAuthorized =(...roles)=>{
-    return(req,res,next)=>{        
-        if (!roles.includes(req.user.role))
-              return next(new Error("Not Authorized!",{cause:401}))
-            return next();
-    }
+    if (!roles.includes(req.user.role))
+      return next(new Error("Not Authorized!", { cause: 401 }));
+    return next();
+  };
 };

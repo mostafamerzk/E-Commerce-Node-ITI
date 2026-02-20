@@ -1,12 +1,12 @@
 # Payment API Contract (Owner: Mostafa)
 
-> **Base URL**: `/payment` (or `/order/payment` depending on implementation preference)
+> **Base URL**: `/payment`
 
-## 1. Create Payment Intent
+## 1. Create Checkout Session
 
-- **Endpoint**: `POST /create-intent`
+- **Endpoint**: `POST /create-checkout-session`
 - **Auth**: User
-- **Description**: Generates a client secret for Stripe (or other gateway) frontend checkout.
+- **Description**: Generates a Stripe Checkout Session URL for the frontend to redirect the user to.
 - **Request Body**:
   ```json
   {
@@ -16,8 +16,8 @@
 - **Success Response (200 OK)**:
   ```json
   {
-    "message": "Payment intent created",
-    "clientSecret": "pi_1234567890_secret_..."
+    "message": "Checkout session created",
+    "url": "https://checkout.stripe.com/pay/cs_test_..."
   }
   ```
 
@@ -25,5 +25,5 @@
 
 - **Endpoint**: `POST /webhook`
 - **Auth**: Public (Verified via Stripe Signature)
-- **Description**: Receives events from payment provider (e.g., `payment_intent.succeeded`) to update order status.
+- **Description**: Receives events from Stripe (e.g., `checkout.session.completed`) to update order status.
 - **Response**: `200 OK` (Empty body)
