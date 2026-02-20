@@ -7,13 +7,12 @@ import cors from "cors";
 
 const bootstrap = async (app, express) => {
   app.use(cors());
-  app.use(
-    express.json({
-      verify: (req, res, buf) => {
-        req.rawBody = buf;
-      },
-    }),
-  );
+
+  // 1. Stripe Webhook Raw Body (MUST be before express.json)
+  app.use("/payment/webhook", express.raw({ type: "application/json" }));
+
+  // 2. Global JSON Parser for all other routes
+  app.use(express.json());
 
   app.use("/auth", authRouter);
   app.use("/user", userRouter);

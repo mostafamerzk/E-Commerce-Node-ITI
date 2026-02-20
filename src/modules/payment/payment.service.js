@@ -50,7 +50,7 @@ export const handleWebhook = async (req, res, next) => {
 
   try {
     event = stripe.webhooks.constructEvent(
-      req.rawBody, // Use preserved raw body
+      req.body, // Now contains raw Buffer from express.raw
       sig,
       process.env.STRIPE_WEBHOOK_SECRET,
     );
