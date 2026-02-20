@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "engines": {
-    "node": "21.2.0"
+    "node": "20.x"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -30,6 +30,7 @@
     "nanoid": "^5.1.0",
     "nodemailer": "^6.9.16",
     "otp-generator": "^4.0.1",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "stripe": "^20.3.1"
   }
 }

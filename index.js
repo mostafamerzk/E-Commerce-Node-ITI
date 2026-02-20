@@ -7,6 +7,13 @@ const app = express();
 await bootstrap(app, express);
 await connectionDB();
 
-app.listen(3000, () => {
-  console.log("server is running on port 3000");
-});
+await bootstrap(app, express);
+await connectionDB();
+
+if (process.env.NODE_ENV !== "production") {
+  app.listen(3000, () => {
+    console.log("server is running on port 3000");
+  });
+}
+
+export default app;
