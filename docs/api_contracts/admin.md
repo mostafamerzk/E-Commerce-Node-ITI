@@ -225,13 +225,13 @@
   }
   ```
 
-## 17. Recover Banner
+## 17. Activate Banner
 
-- **Endpoint**: `PATCH /banners/:bannerId/recover`
+- **Endpoint**: `PATCH /banners/:bannerId/activate`
 - **Auth**: Admin
 - **Success Response (200 OK)**:
   ```json
   {
-    "message": "Banner recovered successfully"
+    "message": "Banner activated successfully"
   }
   ```

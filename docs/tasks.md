@@ -205,7 +205,7 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] DELETE `/admin/products/:productId` — remove a product
 - [ ] GET `/admin/orders` — list all orders (with filters, status)
 - [ ] PATCH `/admin/orders/:orderId` — update order/shipping status
-  - [ ] Validate status transition (e.g., can't go from `delivered` → `processing`)
+- [ ] Validate status transition (e.g., can't go from `delivered` → `processing`)
 - [ ] CRUD `/admin/banners` — content management for homepage banners
 - [ ] _(bonus)_ CRUD `/admin/promo` — discount & promo-code management
 

@@ -20,7 +20,7 @@ export const sortObject = (sortParam) => {
         oldest: { createdAt: 1 },
         totalHigh: { totalAmount: -1 },
         totalLow: { totalAmount: 1 },
-        status: { status: 1 }
+        orderStatus: { status: 1 }
     };
 
     return sortOptions[sortParam] || { createdAt: -1 };
@@ -29,17 +29,16 @@ export const sortObject = (sortParam) => {
 export const filterObject = (query) => {
     const filter = {};
 
-    if (query.status) filter.status = query.status;
+    if (query.status) filter.orderStatus = query.status;
     if (query.userId) filter.userId = query.userId;
     
     if (query.minTotal || query.maxTotal) {
-        filter.totalAmount = {};
-        if (query.minTotal) filter.totalAmount.$gte = Number(query.minTotal);
-        if (query.maxTotal) filter.totalAmount.$lte = Number(query.maxTotal);
+        filter.totalPrice = {};
+        if (query.minTotal) filter.totalPrice.$gte = Number(query.minTotal);
+        if (query.maxTotal) filter.totalPrice.$lte = Number(query.maxTotal);
     }
-
     if (query.paymentStatus) filter.paymentStatus = query.paymentStatus;
-    if (query.shippingStatus) filter.shippingStatus = query.shippingStatus;
+    if(query.paymentMethod) filter.paymentMethod = query.paymentMethod;
     
     if (query.startDate || query.endDate) {
         filter.createdAt = {};

@@ -6,6 +6,7 @@ import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { roles } from "../../utils/enums/enums.js";
 import { validation } from "../../middleware/validation.middleware.js";
 import * as adminValidation from "./admin.validation.js";
+import { uploadCloud, fileValidations } from "../../utils/multer/cloudUpload.js";
 export const adminRoutes = express.Router();
 //1
 adminRoutes.route("/users")
@@ -67,34 +68,36 @@ adminRoutes.route("/orders/:id")
 adminRoutes.route("/orders/:id/status")
     .patch(asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
-        validation(adminValidation.getByIdSchema),
+        validation(adminValidation.updateOrderStatusSchema),
         asyncHandler(adminService.updateOrderStatus))  
 //12
 adminRoutes.route("/banners")
     .get(asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         asyncHandler(adminService.getAllBanners))
-//13
-adminRoutes.route("/banners/:id")
-    .get(asyncHandler(isAuthenticated),
-    isAuthorized(roles.admin),
-    asyncHandler(adminService.getBannerById)
-)
-//14
-adminRoutes.route("/banners")
     .post(asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
+        uploadCloud(fileValidations.Image).single("image"),
         asyncHandler(adminService.createBanner))
-//15
+
 adminRoutes.route("/banners/:id")
+    .get(asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
+        validation(adminValidation.getByIdSchema),
+        asyncHandler(adminService.getBannerById))
+    .patch(asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
+        uploadCloud(fileValidations.Image).single("image"),
+        validation(adminValidation.updateBannerSchema),
+        asyncHandler(adminService.updateBanner))
     .delete(asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         validation(adminValidation.getByIdSchema),
-        asyncHandler(adminService.deleteBanner))
+        asyncHandler(adminService.deActivateBanner))
 //16
-adminRoutes.route("/banners/:id/recover")
+adminRoutes.route("/banners/:id/activate")
     .patch(asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         validation(adminValidation.getByIdSchema),
-        asyncHandler(adminService.recoverBanner))
+        asyncHandler(adminService.activateBanner))
 

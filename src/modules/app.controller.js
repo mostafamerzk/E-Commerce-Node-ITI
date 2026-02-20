@@ -2,6 +2,7 @@ import { globalHandler } from "../utils/error handling/globalHandler.js";
 import authRouter from "./auth/auth.controller.js";
 import userRouter from "./User/user.controller.js";
 import { adminRoutes } from "./admin/admin.controller.js";
+import reviewRoutes from "./review/review.controller.js";
 import cors from "cors";
 const bootstrap = async (app, express) => {
   app.use(cors());
@@ -9,6 +10,7 @@ const bootstrap = async (app, express) => {
   app.use("/admin", adminRoutes);
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
+  app.use("/review", reviewRoutes);
   // not found route
   app.use((req, res) => {
     return res.status(404).json({ message: "Route not found" });

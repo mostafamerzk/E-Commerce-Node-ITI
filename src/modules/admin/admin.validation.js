@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { orderStatus } from "../../utils/enums/enums.js";
 export const createAdminSchema = Joi.object({
     userName: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
@@ -14,3 +15,15 @@ export const updateAdminSchema = Joi.object({
 export const getByIdSchema = Joi.object({
     id: Joi.string().hex().length(24).required()
 });
+
+export const updateOrderStatusSchema = Joi.object({
+    id: Joi.string().hex().length(24).required(),
+    orderStatus: Joi.string().valid(...Object.values(orderStatus)).required()
+})
+
+export const updateBannerSchema = Joi.object({
+    id: Joi.string().hex().length(24).required(),
+    title: Joi.string().min(2).max(100),
+    link: Joi.string().uri(),
+    isActive: Joi.boolean()
+}).min(1);

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -14,7 +15,7 @@ const reviewSchema = new mongoose.Schema(
     },
     rating: {
       type: Number,
-      required: [true, "rating is required"],
+      required: true,
       min: [1, "rating must be at least 1"],
       max: [5, "rating must be at most 5"],
     },
@@ -23,14 +24,10 @@ const reviewSchema = new mongoose.Schema(
       trim: true,
       maxlength: [1000, "comment must be at most 1000 characters"],
     },
-    parentComment:{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Reviews",
-      default: null
-    }
   },
   { timestamps: true },
 );
+reviewSchema.plugin(mongoosePaginate);
 
 // one review per user per product
 reviewSchema.index({ userId: 1, productId: 1 }, { unique: true });

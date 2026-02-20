@@ -6,6 +6,7 @@ import * as productFiltersBuilder from "../../utils/product/build.js";
 import * as orderFiltersBuilder from "../../utils/order/build.js";
 import * as bannerFiltersBuilder from "../../utils/banner/build.js";
 import {orderStatus} from "../../utils/enums/enums.js";
+import { cloud } from "../../utils/multer/cloud.config.js";
 //Admin data Retrival
 
 /**
@@ -195,7 +196,14 @@ export const getAllOrders = async (req, res) => {
         orders: orders
     });
 }
-
+export const getOrderById = async (req, res, next) => {
+    const {id} = req.params;
+    const order = await Order.findById(id);
+    if (!order) {
+        return next(new Error("Order not found"), {cause: 404});
+    }
+    return res.status(200).json({message:"Order found",data:order})
+}   
 /**
  * Update order status
  * 
@@ -218,7 +226,7 @@ export const getAllOrders = async (req, res) => {
  * // Response: { message: "Order status updated", order: { _id: "...", status: "shipped", ... } }
  */
 export const updateOrderStatus = async (req, res, next) => {
-    const {orderId} = req.params;
+    const {id} = req.params;
     const {orderStatus: newStatus} = req.body;
     
     const validStatuses = Object.values(orderStatus);
@@ -226,7 +234,7 @@ export const updateOrderStatus = async (req, res, next) => {
         return next(new Error("Invalid order status"));
     }
     
-    const order = await Order.findByIdAndUpdate(orderId, {status: newStatus}, {new: true});
+    const order = await Order.findByIdAndUpdate(id, {status: newStatus}, {new: true});
     if (!order) {
         return next(new Error("order not found"),{cause: 404});
     }
@@ -292,13 +300,22 @@ export const getAllBanners = async (req, res) => {
  */
 export const createBanner = async (req, res, next) => {
     const {title, link} = req.body;
-    const image = req.file?.filename;
 
-    if (!title || !link || !image) {
-        return next(new Error("Title, link, and image are required"));
+    if (!req.file) {
+        return next(new Error("Image is required"), { cause: 400 });
     }
 
-    const banner = await Banner.create({title, link, image, isActive: true});
+    const { secure_url, public_id } = await cloud.uploader.upload(req.file.path, {
+        folder: `${process.env.CLOUD_NAME}/banners/`
+    });
+
+    const banner = await Banner.create({
+        title, 
+        link, 
+        image: { secure_url, public_id }, 
+        isActive: true,
+        createdBy: req.user._id
+    });
     
     return res.status(201).json({
         message: "Banner created successfully",
@@ -324,8 +341,8 @@ export const createBanner = async (req, res, next) => {
  * // Response: { message: "Banner found", banner: { _id: "507f1f77bcf86cd799439011", title: "Summer Sale", ... } }
  */
 export const getBannerById = async (req, res, next) => {
-    const {bannerId} = req.params;
-    const banner = await Banner.findById(bannerId);
+    const {id} = req.params;
+    const banner = await Banner.findById(id);
     
     if (!banner) {
         return next(new Error("Banner not found"),{cause: 404});
@@ -340,10 +357,10 @@ export const getBannerById = async (req, res, next) => {
 /**
  * Update a banner with optional image upload
  * 
- * @route PATCH /admin/banners/:bannerId
+ * @route PATCH /admin/banners/:id
  * @param {Object} req - Express request object
  * @param {Object} req.params - Route parameters
- * @param {string} req.params.bannerId - MongoDB banner ID (ObjectId)
+ * @param {string} req.params.id - MongoDB banner ID (ObjectId)
  * @param {Object} req.body - Request body (all fields optional)
  * @param {string} [req.body.title] - Banner title
  * @param {string} [req.body.link] - Banner link/URL
@@ -361,19 +378,28 @@ export const getBannerById = async (req, res, next) => {
  * // Response: { message: "Banner updated successfully", banner: { _id: "...", title: "Winter Sale", ... } }
  */
 export const updateBanner = async (req, res, next) => {
-    const {bannerId} = req.params;
+    const {id} = req.params;
     const {title, link, isActive} = req.body;
     
-    const updateData = {};
-    if (title) updateData.title = title;
-    if (link) updateData.link = link;
-    if (isActive !== undefined) updateData.isActive = isActive;
-    if (req.file) updateData.image = req.file.filename;
-    
-    const banner = await Banner.findByIdAndUpdate(bannerId, updateData, {new: true});
+    const banner = await Banner.findById(id);
     if (!banner) {
         return next(new Error("Banner not found"),{cause: 404});
     }
+
+    if (title) banner.title = title;
+    if (link) banner.link = link;
+    if (isActive !== undefined) banner.isActive = isActive;
+    
+    if (req.file) {
+        const { secure_url, public_id } = await cloud.uploader.upload(req.file.path, {
+            folder: `${process.env.CLOUD_NAME}/banners`
+        });
+        await cloud.uploader.destroy(banner.image.public_id);
+        
+        banner.image = { secure_url, public_id };
+    }
+    
+    await banner.save();
     
     return res.status(200).json({
         message: "Banner updated successfully",
@@ -400,9 +426,9 @@ export const updateBanner = async (req, res, next) => {
  * // Request: DELETE /admin/banners/507f1f77bcf86cd799439011
  * // Response: { message: "Banner deleted successfully" }
  */
-export const deleteBanner = async (req, res, next) => {
-    const {bannerId} = req.params;
-    const banner = await Banner.findByIdAndUpdate(bannerId, {isDeleted: true}, {new: true});
+export const deActivateBanner = async (req, res, next) => {
+    const {id} = req.params;
+    const banner = await Banner.findByIdAndUpdate(id, {isActive: false}, {new: true});
     
     if (!banner) {
         return next(new Error("Banner not found"),{cause: 404});
@@ -412,16 +438,16 @@ export const deleteBanner = async (req, res, next) => {
         message: "Banner deleted successfully"
     });
 }
-export const recoverBanner = async (req, res, next) => {
-    const {bannerId} = req.params;
-    const banner = await Banner.findByIdAndUpdate(bannerId, {isDeleted: false}, {new: true});
+export const activateBanner = async (req, res, next) => {
+    const {id} = req.params;
+    const banner = await Banner.findByIdAndUpdate(id, {isActive: true}, {new: true});
     
     if (!banner) {
         return next(new Error("Banner not found"),{cause: 404});
     }
     
     return res.status(200).json({
-        message: "Banner recovered successfully",
+        message: "Banner activated successfully",
         banner: banner
     });
 }
