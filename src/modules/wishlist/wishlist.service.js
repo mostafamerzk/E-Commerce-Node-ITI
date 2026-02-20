@@ -5,7 +5,7 @@ export const getwishlist=async(req,res)=>{
 
     const data=await User.findById(req.user._id).populate({  path: "wishlist",
         select: "_id title price mainImage"})
-    res.status(201).json(data.wishlist)
+    res.status(200).json(data.wishlist)
 
 }
 
@@ -25,14 +25,20 @@ export const postwishlist=async(req,res)=>{
 }
 
 export const deletewishlist=async(req,res)=>{
-    let data=req.user.wishlist
-    const chk=data.find((ele)=>ele==req.params.productId)
-    if(!chk)
-        return res.status(404).json("not exist")
-    data= data.filter(ele=>(ele!=req.params.productId))
-    data=await User.findByIdAndUpdate(req.user._id,{wishlist:data},{new:true})
-    res.status(201).json({
-        "message": "Product removed from wishlist",
-        "wishlist": data.wishlist
-      })
+    const { productId } = req.params;
+
+const user = await User.findByIdAndUpdate(
+  req.user._id,
+  { $pull: { wishlist: productId } }, 
+  { new: true }
+);
+
+if (!user) {
+  return res.status(404).json({ message: "User not found" });
+}
+
+res.status(200).json({
+  message: "Product removed from wishlist",
+  wishlist: user.wishlist
+});
 }
