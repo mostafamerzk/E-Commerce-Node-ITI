@@ -14,7 +14,7 @@ const sendEmail = async (to, subject, content) => {
   try {
     const { html, text } = content;
     const info = await transporter.sendMail({
-      from: `"Taswya.Org "<${process.env.EMAIL}>`,
+      from: `"node-iti-intake46.Org "<${process.env.EMAIL}>`,
       to: to,
       subject,
       ...(html ? { html } : { text }),
