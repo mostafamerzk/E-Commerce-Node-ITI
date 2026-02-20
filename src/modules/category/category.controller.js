@@ -8,13 +8,14 @@ import {
   uploadCloud,
   fileValidations,
 } from "../../utils/multer/cloudUpload.js";
+import { roles } from "../../utils/enums/enums.js";
 
 const router = Router();
 
 router.post(
   "/",
   isAuthenticated,
-  isAuthorized("admin"),
+  isAuthorized(roles.admin),
   uploadCloud(fileValidations.Image).single("image"),
   validation(categoryValidation.createCategorySchema),
   categoryService.createCategory,
@@ -31,7 +32,7 @@ router.get(
 router.patch(
   "/:categoryId",
   isAuthenticated,
-  isAuthorized("admin"),
+  isAuthorized(roles.admin),
   uploadCloud(fileValidations.Image).single("image"),
   validation(categoryValidation.updateCategorySchema),
   categoryService.updateCategory,
@@ -40,7 +41,7 @@ router.patch(
 router.delete(
   "/:categoryId",
   isAuthenticated,
-  isAuthorized("admin"),
+  isAuthorized(roles.admin),
   validation(categoryValidation.deleteCategorySchema),
   categoryService.deleteCategory,
 );

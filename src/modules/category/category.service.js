@@ -1,8 +1,7 @@
 import { Category } from "../../DB/Models/category.js";
 import { cloud } from "../../utils/multer/cloud.config.js";
 import { asyncHandler } from "../../utils/error handling/asyncHandler.js";
-import { isValidObjectId } from "../../middleware/validation.middleware.js";
-import slugify from "slugify";
+import mongoose from "mongoose";
 
 export const createCategory = asyncHandler(async (req, res, next) => {
   const { name, parentCategoryId } = req.body;
@@ -12,16 +11,13 @@ export const createCategory = asyncHandler(async (req, res, next) => {
     return next(new Error("Category name already exists", { cause: 409 }));
   }
 
-  // Upload image
-  if (!req.file) {
-    return next(new Error("Category image is required", { cause: 400 }));
-  }
-
+  const categoryId = new mongoose.Types.ObjectId();
   const { secure_url, public_id } = await cloud.uploader.upload(req.file.path, {
-    folder: `${process.env.CLOUD_FOLDER_NAME}/category`,
+    folder: `${process.env.CLOUD_NAME}/category/${categoryId}`,
   });
 
   const category = await Category.create({
+    _id: categoryId,
     name,
     parentCategoryId: parentCategoryId || null,
     image: { secure_url, public_id },
@@ -35,10 +31,7 @@ export const createCategory = asyncHandler(async (req, res, next) => {
 });
 
 export const getCategories = asyncHandler(async (req, res, next) => {
-  const categories = await Category.find().populate([
-    { path: "createdBy", select: "userName email" },
-    { path: "parentCategoryId", select: "name slug" },
-  ]);
+  const categories = await Category.find().lean();
   return res.status(200).json({
     message: "Categories fetched successfully",
     categories,
@@ -48,18 +41,7 @@ export const getCategories = asyncHandler(async (req, res, next) => {
 export const getCategory = asyncHandler(async (req, res, next) => {
   const { categoryId } = req.params;
 
-  // Hybrid approach: Search by ID if valid, otherwise search by slug
-  let query = {};
-  if (categoryId.match(/^[0-9a-fA-F]{24}$/)) {
-    query = { _id: categoryId };
-  } else {
-    query = { slug: categoryId };
-  }
-
-  const category = await Category.findOne(query).populate([
-    { path: "createdBy", select: "userName email" },
-    { path: "parentCategoryId", select: "name slug" },
-  ]);
+  const category = await Category.findById(categoryId).lean();
 
   if (!category) {
     return next(new Error("Category not found", { cause: 404 }));
@@ -80,14 +62,13 @@ export const updateCategory = asyncHandler(async (req, res, next) => {
     return next(new Error("Category not found", { cause: 404 }));
   }
 
-  // Update name and handle slug shift
+  // Update name
   if (name) {
     if (name !== category.name) {
       if (await Category.findOne({ name })) {
         return next(new Error("Category name already exists", { cause: 409 }));
       }
       category.name = name;
-      // Slug will be updated by pre-save hook
     }
   }
 
@@ -103,7 +84,7 @@ export const updateCategory = asyncHandler(async (req, res, next) => {
     const { secure_url, public_id } = await cloud.uploader.upload(
       req.file.path,
       {
-        folder: `${process.env.CLOUD_FOLDER_NAME}/category`,
+        folder: `${process.env.CLOUD_NAME}/category/${categoryId}`,
       },
     );
     category.image = { secure_url, public_id };

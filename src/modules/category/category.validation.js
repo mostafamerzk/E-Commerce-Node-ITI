@@ -37,12 +37,5 @@ export const deleteCategorySchema = Joi.object({
 }).required();
 
 export const getCategorySchema = Joi.object({
-  categoryId: Joi.string()
-    .custom((value, helper) => {
-      // If it's a valid ObjectId, fine. Otherwise, we'll assume it's a slug.
-      // However, Joi custom should usually return the value or error.
-      // For hybrid, we might need to be flexible.
-      return value;
-    })
-    .required(),
+  categoryId: Joi.string().custom(isValidObjectId).required(),
 }).required();
