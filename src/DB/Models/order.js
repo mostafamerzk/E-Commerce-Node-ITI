@@ -68,6 +68,9 @@ const orderSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
+    stripeSessionId: {
+      type: String,
+    },
   },
   { timestamps: true },
 );

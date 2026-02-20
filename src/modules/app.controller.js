@@ -2,14 +2,23 @@ import { globalHandler } from "../utils/error handling/globalHandler.js";
 import authRouter from "./auth/auth.controller.js";
 import userRouter from "./User/user.controller.js";
 import categoryRouter from "./category/category.controller.js";
+import paymentRouter from "./payment/payment.controller.js";
 import cors from "cors";
+
 const bootstrap = async (app, express) => {
   app.use(cors());
-  app.use(express.json());
+  app.use(
+    express.json({
+      verify: (req, res, buf) => {
+        req.rawBody = buf;
+      },
+    }),
+  );
 
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
   app.use("/category", categoryRouter);
+  app.use("/payment", paymentRouter);
   // not found route
   app.use((req, res) => {
     return res.status(404).json({ message: "Route not found" });
