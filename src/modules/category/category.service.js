@@ -79,7 +79,9 @@ export const updateCategory = asyncHandler(async (req, res, next) => {
   // Update image
   if (req.file) {
     // Delete old image
-    await cloud.uploader.destroy(category.image.public_id);
+    if (category.image.public_id) {
+      await cloud.uploader.destroy(category.image.public_id);
+    }
     // Upload new image
     const { secure_url, public_id } = await cloud.uploader.upload(
       req.file.path,
@@ -107,7 +109,9 @@ export const deleteCategory = asyncHandler(async (req, res, next) => {
   }
 
   // Delete from Cloudinary
-  await cloud.uploader.destroy(category.image.public_id);
+  if (category.image.public_id) {
+    await cloud.uploader.destroy(category.image.public_id);
+  }
 
   // Delete from DB
   await Category.findByIdAndDelete(categoryId);
