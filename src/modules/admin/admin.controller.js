@@ -10,94 +10,117 @@ import { uploadCloud, fileValidations } from "../../utils/multer/cloudUpload.js"
 export const adminRoutes = express.Router();
 //1
 adminRoutes.route("/users")
-    .get(asyncHandler(isAuthenticated),
+    .get(
+        validation(adminValidation.getAllUsersSchema),
+        asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         asyncHandler(adminService.getAllUsers));
 //2
 adminRoutes.route("/users/:id")
-    .get(asyncHandler(isAuthenticated),
+    .get(
+        validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         asyncHandler(adminService.getUserById))
 //3
 adminRoutes.route("/users/:id/restrict")
-    .patch(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .patch(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.restrictUser))
 //4
 adminRoutes.route("/users/:id/approve")
-    .patch(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .patch(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.approveUser))
 //5
 adminRoutes.route("/products")
-    .get(asyncHandler(isAuthenticated),
+    .get(
+        validation(adminValidation.getAllProductsSchema),
+        asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         asyncHandler(adminService.getAllProducts))
 //6
 adminRoutes.route("/products/:id")
-    .get(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .get(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.getProductById))
 //7
 adminRoutes.route("/products/:id")
-    .delete(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .delete(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.deleteProduct))
 //8        
 adminRoutes.route("/products/:id/recover")
-    .patch(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .patch(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.recoverProduct))
 //9
 adminRoutes.route("/orders")
-    .get(asyncHandler(isAuthenticated),
+    .get(
+        validation(adminValidation.getAllOrdersSchema),
+        asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         asyncHandler(adminService.getAllOrders))
 //10
 adminRoutes.route("/orders/:id")
-    .get(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .get(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.getOrderById))
 //11
 adminRoutes.route("/orders/:id/status")
-    .patch(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .patch(
         validation(adminValidation.updateOrderStatusSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.updateOrderStatus))  
 //12
 adminRoutes.route("/banners")
-    .get(asyncHandler(isAuthenticated),
+    .get(
+        validation(adminValidation.getAllBannersSchema),
+        asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         asyncHandler(adminService.getAllBanners))
-    .post(asyncHandler(isAuthenticated),
+    .post(
+        validation(adminValidation.createBannerSchema),
+        asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         uploadCloud(fileValidations.Image).single("image"),
         asyncHandler(adminService.createBanner))
 
 adminRoutes.route("/banners/:id")
-    .get(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .get(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.getBannerById))
-    .patch(asyncHandler(isAuthenticated),
+    .patch(
+        validation(adminValidation.updateBannerSchema),
+        asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         uploadCloud(fileValidations.Image).single("image"),
-        validation(adminValidation.updateBannerSchema),
         asyncHandler(adminService.updateBanner))
-    .delete(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .delete(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.deActivateBanner))
 //16
 adminRoutes.route("/banners/:id/activate")
-    .patch(asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
+    .patch(
         validation(adminValidation.getByIdSchema),
+        asyncHandler(isAuthenticated),
+        isAuthorized(roles.admin),
         asyncHandler(adminService.activateBanner))
 

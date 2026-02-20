@@ -13,21 +13,19 @@ export const addReview = async (req, res, next) => {
     if (!product || product.isDeleted) {
         return next(new Error("Product not found"),{cause: 404});
     }
-        const existingReview = await Review.findOne({ userId, productId });
-        if (existingReview) {
-            return next(new Error("You have already reviewed this product"), { cause: 400 });
-        }
-
+    const existingReview = await Review.findOne({ userId, productId });
+    if (existingReview) {
+        return next(new Error("You have already reviewed this product"), { cause: 400 });
+    }
     const review = await Review.create({
         userId,
         productId,
         rating,
         comment
     });
-    // update product average rating
     await updateProductRating(productId);
     res.status(201).json({
-        status: "success",
+        status: "Review added successfully",
         data: {
             review
         }
@@ -44,7 +42,7 @@ export const getProductReviews = async (req, res, next) => {
     const filter = builder.filterObject(req.query,req.params);
     const reviews = await Review.paginate(filter,options)    
     res.status(200).json({
-        status: "success",
+        message: "reviews fetched successfully",
         data: {
             reviews,
             pages: options.pages,
@@ -76,7 +74,7 @@ export const updateReview = async (req, res, next) => {
     await updateProductRating(review.productId);
 
     res.status(200).json({
-        status: "success",
+        message: "Review updated successfully",
         data: {
             review
         }
@@ -99,11 +97,10 @@ export const deleteReview = async (req, res, next) => {
 
     await review.deleteOne();
 
-    // Update product's average rating
     await updateProductRating(review.productId);
 
-    res.status(204).json({
-        status: "success",
+    res.status(200).json({
+        message: "Review deleted successfully",
         data: null
     });
 };

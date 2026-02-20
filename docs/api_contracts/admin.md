@@ -56,7 +56,7 @@
 
 - **Endpoint**: `GET /products`
 - **Auth**: Admin
-- **Query Params**: `page`, `limit`, `sort`, `category`, `brand`, `minPrice`, `maxPrice`, `rating`, `inStock`, `search`
+- **Query Params**: `page`, `limit`, `sort`, `category`, `minPrice`, `maxPrice`, `rating`, `inStock`, `search`
 - **Success Response (200 OK)**:
   ```json
   {
@@ -150,7 +150,7 @@
 
 - **Endpoint**: `GET /banners`
 - **Auth**: Admin
-- **Query Params**: `page`, `limit`, `sort`, `isActive`
+- **Query Params**: `page`, `limit`, `sort`, `isActive`, `search`
 - **Success Response (200 OK)**:
   ```json
   {

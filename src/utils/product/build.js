@@ -28,18 +28,14 @@ export const sortObject = (sortParam) => {
 export const filterObject = (query) => {
     const filter = {};
 
-    if (query.category) filter.category = query.category;
-    if (query.brand) filter.brand = query.brand;
-    
+    if (query.category) filter.category = query.category;    
     if (query.minPrice || query.maxPrice) {
         filter.price = {};
         if (query.minPrice) filter.price.$gte = Number(query.minPrice);
         if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
     }
-
     if (query.rating) filter.rating = { $gte: Number(query.rating) };
     if (query.inStock !== undefined) filter.inStock = query.inStock === "true";
-    
     if (query.search) {
         filter.$text = {$search: query.search};
     }

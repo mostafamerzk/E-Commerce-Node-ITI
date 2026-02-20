@@ -18,7 +18,7 @@ export const sortObject = (sortParam) => {
     const sortOptions = {
         newest: { createdAt: -1 },
         oldest: { createdAt: 1 },
-        title: { title: 1 }
+        title: { title: 1 },
     };
 
     return sortOptions[sortParam] || { createdAt: -1 };
@@ -28,7 +28,7 @@ export const filterObject = (query) => {
     const filter = {};
 
     if (query.isActive !== undefined) filter.isActive = query.isActive === "true";
-    if (query.title) filter.title = { $regex: query.title, $options: "i" };
+    if (query.search) filter.$text = { $search: query.search };
     
     return filter;
 };
