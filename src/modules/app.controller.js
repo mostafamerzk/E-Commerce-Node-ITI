@@ -9,10 +9,8 @@ import { wishlistRouter } from "./wishlist/wishlist.controller.js";
 const bootstrap = async (app, express) => {
   app.use(cors());
 
-  // 1. Stripe Webhook Raw Body (MUST be before express.json)
   app.use("/payment/webhook", express.raw({ type: "application/json" }));
 
-  // 2. Global JSON Parser for all other routes
   app.use(express.json());
 
   app.use("/auth", authRouter);
