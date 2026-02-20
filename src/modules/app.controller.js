@@ -5,6 +5,7 @@ import categoryRouter from "./category/category.controller.js";
 import paymentRouter from "./payment/payment.controller.js";
 import cors from "cors";
 import { wishlistRouter } from "./wishlist/wishlist.controller.js";
+import sellerrouter from "./seller/seller.controller.js";
 
 const bootstrap = async (app, express) => {
   app.use(cors());
@@ -19,6 +20,8 @@ const bootstrap = async (app, express) => {
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
   app.use("/wish", wishlistRouter);
+  app.use("/seller", sellerrouter);
+
 
   app.use("/category", categoryRouter);
   app.use("/payment", paymentRouter);

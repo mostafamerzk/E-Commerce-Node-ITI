@@ -7,8 +7,6 @@ const app = express();
 await bootstrap(app, express);
 await connectionDB();
 
-await bootstrap(app, express);
-await connectionDB();
 
 if (process.env.NODE_ENV !== "production") {
   app.listen(3000, () => {

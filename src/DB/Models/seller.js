@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-
+import { User } from "../../DB/Models/user.js"; // صحح المسار حسب مشروعك
 const sellerSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
     required: true
   },
   storeName: {
