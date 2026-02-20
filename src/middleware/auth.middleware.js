@@ -14,6 +14,7 @@ export const isAuthenticated = async (req, res, next) => {
 
     const [bearer, token] = authorization.split(' ');
     if (bearer !== 'Bearer' || !token) {
+      console.log(token)
       return next(new Error('Invalid token format'));
     }
 

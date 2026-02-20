@@ -4,6 +4,7 @@ import userRouter from "./User/user.controller.js";
 import categoryRouter from "./category/category.controller.js";
 import paymentRouter from "./payment/payment.controller.js";
 import cors from "cors";
+import { wishlistRouter } from "./wishlist/wishlist.controller.js";
 
 const bootstrap = async (app, express) => {
   app.use(cors());
@@ -16,6 +17,8 @@ const bootstrap = async (app, express) => {
 
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
+  app.use("/wish", wishlistRouter);
+
   app.use("/category", categoryRouter);
   app.use("/payment", paymentRouter);
   // not found route
