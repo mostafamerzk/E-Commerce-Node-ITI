@@ -1,3 +1,4 @@
+import "dotenv/config";
 import bootstrap from "./src/modules/app.controller.js";
 import express from "express";
 import { connectionDB } from "./src/DB/connection.js";

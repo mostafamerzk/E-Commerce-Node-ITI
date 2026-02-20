@@ -1,6 +1,5 @@
 import { User } from "../../DB/Models/user.js";
 import { providers } from "../../utils/enums/enums.js";
-import dotenv from "dotenv";
 import { activateAcc } from "../../utils/email/email.event.js";
 import { compareHash, hash } from "../../utils/hashing/hash.js";
 import { generateToken, verifyToken } from "../../utils/token/token.js";
@@ -8,8 +7,6 @@ import { Subjects } from "../../utils/email/sendEmail.js";
 import { send_otp } from "../../utils/otp/otp.event.js";
 import { OTP } from "../../DB/Models/OTP.js";
 import { OAuth2Client } from "google-auth-library";
-
-dotenv.config();
 
 export const register = async (req, res, next) => {
   // ensure that email not exist
