@@ -91,7 +91,7 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 
 ---
 
-### 👤 Mostafa — Product Management + Category + Payment Integration
+### 👤 Mostafa — Checkout + Order + Category + Payment Integration
 
 > Owns the Product & Category domain + Payment gateway.
 
@@ -104,20 +104,6 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] DELETE `/category/:categoryId` — delete category (admin only)
 - [ ] Validation schemas for category
 
-#### Product ⭐
-
-- [ ] POST `/product` — create product (seller/admin)
-- [ ] GET `/product` — list all products
-- [ ] GET `/product/:productId` — get single product (with reviews populated)
-- [ ] PATCH `/product/:productId` — update product (owner/admin)
-- [ ] DELETE `/product/:productId` — soft-delete product (owner/admin)
-- [ ] **Search** — GET `/product?search=keyword` (search by name)
-- [ ] **Filtration** — GET `/product?minPrice=&maxPrice=&categoryId=` (filter by price, category)
-- [ ] **Sorting** — GET `/product?sort=price,-createdAt`
-- [ ] **Pagination** — GET `/product?page=1&limit=10`
-- [ ] Product image upload (main + gallery) via Cloudinary
-- [ ] Validation schemas for product
-
 #### Payment Integration
 
 - [ ] Integrate **Stripe** (or PayPal) payment gateway
@@ -126,23 +112,6 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 - [ ] Handle payment success → create order
 - [ ] Handle payment failure → return error, keep cart intact
 - [ ] _(bonus)_ Card saving & auto-fill for quick checkout
-
----
-
-### 👤 Fathi — Shopping Cart + Checkout + Order
-
-> Owns the purchase flow: Cart → Checkout → Order creation & tracking.
-
-#### Shopping Cart
-
-- [ ] POST `/cart` — add product to cart
-- [ ] GET `/cart` — get user's cart
-- [ ] PATCH `/cart/:productId` — update quantity of item in cart
-- [ ] DELETE `/cart/:productId` — remove item from cart
-- [ ] DELETE `/cart` — clear entire cart
-- [ ] Auto-calculate `totalPrice` on every update
-- [ ] Validate stock availability before adding to cart
-- [ ] Validation schemas for cart
 
 #### Checkout
 
@@ -165,6 +134,37 @@ Each developer owns **one domain end-to-end**: validation → service → contro
   - [ ] Restore stock on cancellation
 - [ ] Send **order confirmation email** to user (using existing email utils)
 - [ ] Send email on **status change** (shipped, delivered, cancelled)
+
+---
+
+### 👤 Fathi — Shopping Cart + Product Management
+
+> Owns the purchase flow: Cart → Checkout → Order creation & tracking.
+
+#### Product ⭐
+
+- [ ] POST `/product` — create product (seller/admin)
+- [ ] GET `/product` — list all products
+- [ ] GET `/product/:productId` — get single product (with reviews populated)
+- [ ] PATCH `/product/:productId` — update product (owner/admin)
+- [ ] DELETE `/product/:productId` — soft-delete product (owner/admin)
+- [ ] **Search** — GET `/product?search=keyword` (search by name)
+- [ ] **Filtration** — GET `/product?minPrice=&maxPrice=&categoryId=` (filter by price, category)
+- [ ] **Sorting** — GET `/product?sort=price,-createdAt`
+- [ ] **Pagination** — GET `/product?page=1&limit=10`
+- [ ] Product image upload (main + gallery) via Cloudinary
+- [ ] Validation schemas for product
+
+#### Shopping Cart
+
+- [ ] POST `/cart` — add product to cart
+- [ ] GET `/cart` — get user's cart
+- [ ] PATCH `/cart/:productId` — update quantity of item in cart
+- [ ] DELETE `/cart/:productId` — remove item from cart
+- [ ] DELETE `/cart` — clear entire cart
+- [ ] Auto-calculate `totalPrice` on every update
+- [ ] Validate stock availability before adding to cart
+- [ ] Validation schemas for cart
 
 ---
 
@@ -224,10 +224,10 @@ Each developer owns **one domain end-to-end**: validation → service → contro
 
 ```mermaid
 graph TD
-    P0["Phase 0<br>All Models"] --> M["Mostafa<br>Product + Category + Payment"]
-    P0 --> F["Fathi<br>Cart + Order"]
-    P0 --> MK["Mokhtar<br>Wishlist + Reviews"]
-    P0 --> I["Issac<br>Admin + Seller"]
+    P0["Phase 0<br>All Models"] --> M["Mostafa<br>Order + Category + Payment"]
+    P0 --> F["Fathi<br>Cart + Product"]
+    P0 --> MK["Mokhtar<br>Wishlist + Seller"]
+    P0 --> I["Issac<br>Admin + Reviews"]
 ```
 
 > **Key points:**
@@ -254,10 +254,10 @@ graph TD
 
 ## 🗓️ Execution Order
 
-| Phase       | Who          | What                                              |
-| ----------- | ------------ | ------------------------------------------------- |
-| **Phase 0** | **Everyone** | Create all models together                        |
-| **Phase 1** | **Mostafa**  | Category + Product CRUD + Search/Filter + Payment |
-| **Phase 1** | **Fathi**    | Cart + Checkout + Order                           |
-| **Phase 1** | **Mokhtar**  | Wishlist + Reviews & Ratings                      |
-| **Phase 1** | **Issac**    | Admin Panel + Seller Management                   |
+| Phase       | Who          | What                                            |
+| ----------- | ------------ | ----------------------------------------------- |
+| **Phase 0** | **Everyone** | Create all models together                      |
+| **Phase 1** | **Mostafa**  | Category + Order CRUD + Search/Filter + Payment |
+| **Phase 1** | **Fathi**    | Cart + Checkout + Product                       |
+| **Phase 1** | **Mokhtar**  | Wishlist + Seller Management                    |
+| **Phase 1** | **Issac**    | Admin Panel + Reviews & Ratings                 |
