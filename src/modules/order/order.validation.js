@@ -3,7 +3,7 @@ import { isValidObjectId } from "../../middleware/validation.middleware.js";
 import { paymentMethods } from "../../utils/enums/enums.js";
 
 export const checkoutSummarySchema = Joi.object({
-  couponCode: Joi.string().trim(),
+  couponCode: Joi.string().trim().optional(),
   shippingAddress: Joi.object({
     street: Joi.string().required(),
     city: Joi.string().required(),
@@ -24,7 +24,7 @@ export const placeOrderSchema = Joi.object({
     postalCode: Joi.string(),
     phone: Joi.string().required(),
   }).required(),
-  couponCode: Joi.string().trim(),
+  couponCode: Joi.string().trim().optional(),
 }).required();
 
 export const getUserOrdersSchema = Joi.object({
