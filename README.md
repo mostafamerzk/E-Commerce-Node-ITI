@@ -110,10 +110,10 @@ The application is configured for deployment on Vercel. Database hosting is hand
 
 ## Authors
 
-Built by the ITI Node.js E-Commerce Team:
+Built by the ITI-intake-46 Node.js E-Commerce Team:
 
-- Mostafa: Product Management, Categories, and Payment Integration
-- Fathi: Shopping Cart, Checkout, and Order Management
+- Mostafa: Order Management, Categories, and Payment Integration
+- Fathi: Shopping Cart, Checkout, and Product Management
 - Mokhtar: Wishlist and Seller Management
 - Issac: Admin Dashboard and Reviews System
 
