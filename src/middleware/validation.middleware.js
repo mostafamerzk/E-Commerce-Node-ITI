@@ -20,6 +20,6 @@ export const validation = (schema)=>{
     // for joi.custom(value,helper) 
 export const isValidObjectId = (value,helper)=>{
     if (!Types.ObjectId.isValid(value))
-        return helper.message("in valid id")
+        return helper.message("invalid id")
     return true;
 };
