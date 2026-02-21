@@ -1,34 +1,29 @@
-import { Seller } from "../../DB/Models/seller.js";
 import { Product } from "../../DB/Models/product.js";
 import { User } from "../../DB/Models/user.js";
 
-/**
- * PATCH /seller/profile
- * Add or update seller profile
- */
+
 export const upsertSellerProfileService = async (req, res) => {
   try {
     const { storeName, phone, storeDescription, storeImage } = req.body;
-    await User.findByIdAndUpdate(req.user._id,{role:"seller"},{new:true})
 
-    let seller = await Seller.findOne({ userId: req.user._id });
+    let seller = await User.findOne({ userId: req.user._id });
     if (seller) {
-      // تحديث بيانات Seller
       seller.storeName = storeName ?? seller.storeName;
       seller.phone = phone ?? seller.phone;
       seller.storeDescription = storeDescription ?? seller.storeDescription;
       seller.storeImage = storeImage ?? seller.storeImage;
 
-      await seller.save();
+      await User.save();
     } else {
-      // إنشاء Seller جديد
-      seller = await Seller.create({
+      seller = await User.create({
         userId: req.user._id,
         storeName,
         phone,
         storeDescription,
         storeImage
       });
+      await User.findByIdAndUpdate(req.user._id,{role:"seller"},{new:true})
+
     }
 
     return res.status(200).json({
@@ -44,13 +39,9 @@ export const upsertSellerProfileService = async (req, res) => {
   }
 };
 
-/**
- * GET /seller/profile
- * جلب بيانات Seller المرتبط بالمستخدم
- */
+
 export const getSellerProfileService = async (req, res) => {
   try {
-    console.log(1)
     const seller = await Seller.findOne({ userId: req.user._id }).populate(
       "userId",
       "name email phone"
@@ -73,13 +64,14 @@ export const getSellerProfileService = async (req, res) => {
   }
 };
 
-/**
- * GET /seller/products
- * جلب جميع منتجات الـ Seller
- */
+
 export const getSellerProductsService = async (req, res) => {
   try {
-    const products = await Product.find({ sellerId: req.user._id });
+    let seller = await Seller.findOne({ userId: req.user._id });
+if(!seller)
+  return res.status(404).json("seller not found")
+
+    const products = await Product.find({ createdBy: req.user._id });
 
     return res.status(200).json({
       message: "Seller products fetched",

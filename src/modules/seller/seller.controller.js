@@ -11,25 +11,17 @@ import { createSellerSchema } from "./seller.validation.js";
 
 const sellerRouter = express.Router();
 
-// ========================================
-// جميع الـ routes تحتاج مستخدم مسجل
-// ========================================
+
 sellerRouter.use(isAuthenticated);
 
-// ========================================
-// PATCH /seller/profile
-// إضافة أو تعديل بيانات Seller
-// ========================================
+
 sellerRouter.patch(
   "/profile",
   validation(createSellerSchema),
   upsertSellerProfileService
 );
 
-// ========================================
-// GET /seller/profile
-// جلب بيانات Seller
-// ========================================
+
 sellerRouter.get("/profile", getSellerProfileService);
 
 // ========================================
