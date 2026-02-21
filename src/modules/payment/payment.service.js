@@ -5,13 +5,20 @@ import { orderStatus, paymentStatus } from "../../utils/enums/enums.js";
 export const createCheckoutSession = async (req, res, next) => {
   const { orderId } = req.body;
 
-  const order = await Order.findById(orderId);
+  const order = await Order.findOne({ _id: orderId, userId: req.user._id });
   if (!order) {
     return next(new Error("Order not found", { cause: 404 }));
   }
-
-  if (order.paymentStatus === paymentStatus.paid) {
-    return next(new Error("Order is already paid", { cause: 400 }));
+  // if order status is not pending
+  if (order.orderStatus !== orderStatus.pending) {
+    return next(new Error("Order is not pending", { cause: 400 }));
+  }
+  // if order payment status is paid or refunded
+  if (
+    order.paymentStatus === paymentStatus.paid ||
+    order.paymentStatus === paymentStatus.refunded
+  ) {
+    return next(new Error("Order is already paid or refunded", { cause: 400 }));
   }
 
   const session = await stripe.checkout.sessions.create({
