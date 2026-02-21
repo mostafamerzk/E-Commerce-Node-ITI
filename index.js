@@ -7,10 +7,7 @@ const app = express();
 await bootstrap(app, express);
 await connectionDB();
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 4ecbde4d92f2417f4213691ee5eda2b5539f6ca2
 if (process.env.NODE_ENV !== "production") {
   app.listen(3000, () => {
     console.log("server is running on port 3000");
