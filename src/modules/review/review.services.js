@@ -15,9 +15,11 @@ export const addReview = async (req, res, next) => {
   }
   const existingReview = await Review.findOne({ userId, productId });
   if (existingReview) {
-    return next(new Error("You have already reviewed this product"), {
-      cause: 400,
-    });
+    return next(
+      new Error("You have already reviewed this product", {
+        cause: 400,
+      }),
+    );
   }
   const review = await Review.create({
     userId,
@@ -27,7 +29,7 @@ export const addReview = async (req, res, next) => {
   });
   await updateProductRating(productId);
   res.status(201).json({
-    status: "Review added successfully",
+    message: "Review added successfully",
     review: review,
   });
 };
@@ -56,14 +58,15 @@ export const updateReview = async (req, res, next) => {
   const { reviewId } = req.params;
   const { rating, comment } = req.body;
   const userId = req.user._id;
-  console.log(userId);
   const review = await Review.findById(reviewId);
   if (!review) {
-    return next(new Error("Review not found"), { cause: 404 });
+    return next(new Error("Review not found", { cause: 404 }));
   }
 
   if (review.userId.toString() !== userId.toString()) {
-    return next(new Error("You can only update your own reviews", 403));
+    return next(
+      new Error("You can only update your own reviews", { cause: 403 }),
+    );
   }
 
   review.rating = rating ? rating : review.rating;
@@ -86,16 +89,18 @@ export const deleteReview = async (req, res, next) => {
 
   const review = await Review.findById(reviewId);
   if (!review) {
-    return next(new Error("Review not found"), { cause: 404 });
+    return next(new Error("Review not found", { cause: 404 }));
   }
 
   if (
     review.userId.toString() !== user._id.toString() &&
     user.role !== roles.admin
   ) {
-    return next(new Error("You can only delete your own reviews"), {
-      cause: 403,
-    });
+    return next(
+      new Error("You can only delete your own reviews", {
+        cause: 403,
+      }),
+    );
   }
 
   await review.deleteOne();
