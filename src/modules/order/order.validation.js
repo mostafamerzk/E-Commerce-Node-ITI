@@ -11,7 +11,7 @@ export const checkoutSummarySchema = Joi.object({
     postalCode: Joi.string(),
     phone: Joi.string().required(),
   }).optional(),
-}).required();
+}).optional();
 
 export const placeOrderSchema = Joi.object({
   paymentMethod: Joi.string()
@@ -26,6 +26,11 @@ export const placeOrderSchema = Joi.object({
   }).required(),
   couponCode: Joi.string().trim(),
 }).required();
+
+export const getUserOrdersSchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  limit: Joi.number().integer().min(1).max(50).default(10),
+}).optional();
 
 export const orderIdSchema = Joi.object({
   orderId: Joi.string().custom(isValidObjectId).required(),

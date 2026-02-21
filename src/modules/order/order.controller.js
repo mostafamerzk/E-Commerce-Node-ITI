@@ -12,6 +12,7 @@ import {
 import {
   checkoutSummarySchema,
   placeOrderSchema,
+  getUserOrdersSchema,
   orderIdSchema,
 } from "./order.validation.js";
 
@@ -31,7 +32,12 @@ orderRouter.post(
   asyncHandler(placeOrder),
 );
 
-orderRouter.get("/", isAuthenticated, asyncHandler(getUserOrders));
+orderRouter.get(
+  "/",
+  isAuthenticated,
+  validation(getUserOrdersSchema),
+  asyncHandler(getUserOrders),
+);
 
 orderRouter.get(
   "/:orderId",
