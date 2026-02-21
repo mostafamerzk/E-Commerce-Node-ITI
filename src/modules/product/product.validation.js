@@ -49,10 +49,15 @@ export const getProductsQuerySchema = Joi.object({
 
 
 export const updateProductSchema = Joi.object({
+  productId: Joi.string().custom(isValidObjectId),
   title: Joi.string().min(2).max(200),
   description: Joi.string().max(2000).allow(""),
   price: Joi.number().min(0),
   discount: Joi.number().min(0).max(100),
   stock: Joi.number().min(0),
   categoryId: Joi.string().custom(isValidObjectId)
+});
+
+export const productIdSchema = Joi.object({
+  productId: Joi.string().custom(isValidObjectId)
 });

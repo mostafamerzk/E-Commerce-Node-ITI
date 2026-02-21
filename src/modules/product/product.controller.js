@@ -12,16 +12,16 @@ import {
 import {
   createProductSchema,
   getProductsQuerySchema,
+  productIdSchema,
   updateProductSchema
 } from "./product.validation.js";
 import { isAuthorized } from "../../middleware/authorization.middleware.js";
 import { roles } from "../../utils/enums/enums.js";
-import { uploadCloud } from "../../middleware/multer/cloudUpload.js";
-import { fileValidations } from "../../utils/multer/cloudUpload.js";
+import { fileValidations, uploadCloud } from "../../utils/multer/cloudUpload.js";
 
 export const productRouter = new Router();
 
-const uploadProductImages = uploadCloud(fileValidations.Image).fields([
+const uploadProductImages =  uploadCloud(fileValidations.Image).fields([
   { name: "mainImage", maxCount: 1 },
   { name: "subImages", maxCount: 5 }
 ]);
@@ -30,8 +30,8 @@ productRouter.post(
   "/",
   isAuthenticated,
   isAuthorized(roles.admin, roles.seller),
-  validation(createProductSchema),
   uploadProductImages,
+  validation(createProductSchema),
   asyncHandler(createProduct)
 );
 
@@ -43,6 +43,7 @@ productRouter.get(
 
 productRouter.get(
   "/:productId",
+  validation(productIdSchema),
   asyncHandler(getSingleProduct)
 );
 
@@ -50,13 +51,14 @@ productRouter.patch(
   "/:productId",
   isAuthenticated,
   isAuthorized(roles.admin, roles.seller),
-  validation(updateProductSchema),
   uploadProductImages,
+  validation(updateProductSchema),
   asyncHandler(updateProduct)
 );
 
 productRouter.delete(
   "/:productId",
+  validation(productIdSchema),
   isAuthenticated,
   isAuthorized(roles.admin, roles.seller),
   asyncHandler(deleteProduct)
