@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { hash } from "../../utils/hashing/hash.js";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 import { roles, providers } from "../../utils/enums/enums.js";
 const user = new mongoose.Schema(
@@ -65,7 +66,7 @@ const user = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
+user.plugin(mongoosePaginate);
 user.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = hash({ plainText: this.password });

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import mongoosePaginate from "mongoose-paginate-v2";
 import {
   orderStatus,
   paymentStatus,
@@ -74,5 +74,7 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+orderSchema.plugin(mongoosePaginate);
+
 
 export const Order = mongoose.model("Orders", orderSchema);
