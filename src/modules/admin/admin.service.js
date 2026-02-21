@@ -102,6 +102,7 @@ export const restrictUser = async (req, res, next) => {
   }
   return res.status(200).json({ message: "user restricted", data: user });
 };
+
 /**
  * Approve/un-restrict a user by setting isDeleted flag to false
  * This restores access to the user's account if they were previously restricted
@@ -241,6 +242,7 @@ export const getOrderById = async (req, res, next) => {
  * // Request: PATCH /admin/orders/507f1f77bcf86cd799439011
  * // Body: { "orderStatus": "shipped" }
  * // Response: { message: "Order status updated", order: { _id: "...", status: "shipped", ... } }
+ * // Error: { message: "order not found" }
  */
 export const updateOrderStatus = async (req, res, next) => {
   const { id } = req.params;

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const bannerSchema = new mongoose.Schema(
   {
@@ -32,5 +33,6 @@ const bannerSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
+bannerSchema.plugin(mongoosePaginate)
+bannerSchema.index({ title: "text" });
 export const Banner = mongoose.model("Banners", bannerSchema);

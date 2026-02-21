@@ -10,7 +10,7 @@
   ```json
   {
     "rating": 5, // Required, min: 1, max: 5
-    "comment": "Great product!" // Optional, max: 1000 chars
+    "comment": "Great product!", // Optional, max: 1000 chars
   }
   ```
 - **Success Response (201 Created)**:
@@ -22,7 +22,8 @@
       "userId": "64a...",
       "productId": "64c...",
       "rating": 5,
-      "comment": "Great product!"
+      "comment": "Great product!",
+      "parentComment": "64f..."
     }
   }
   ```
