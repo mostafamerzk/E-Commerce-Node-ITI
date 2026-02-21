@@ -1,5 +1,6 @@
 import { globalHandler } from "../utils/error handling/globalHandler.js";
 import authRouter from "./auth/auth.controller.js";
+import { productRouter } from "./product/product.controller.js";
 import { cartRouter } from "./cart/cart.controller.js";
 import userRouter from "./User/user.controller.js";
 import categoryRouter from "./category/category.controller.js";
@@ -22,6 +23,7 @@ const bootstrap = async (app, express) => {
   app.use("/category", categoryRouter);
   app.use("/wish", wishlistRouter);
   app.use("/payment", paymentRouter);
+  app.use("/product" ,productRouter)
   app.use("/review", reviewRoutes);
   // not found route
   app.use((req, res) => {
