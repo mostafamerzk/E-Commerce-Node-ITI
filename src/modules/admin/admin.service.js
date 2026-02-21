@@ -1,17 +1,17 @@
-import {User} from "../../DB/Models/user.js";
-import {Product} from "../../DB/Models/product.js";
-import {Order} from "../../DB/Models/order.js";
-import {Banner} from "../../DB/Models/banner.js";
+import { User } from "../../DB/Models/user.js";
+import { Product } from "../../DB/Models/product.js";
+import { Order } from "../../DB/Models/order.js";
+import { Banner } from "../../DB/Models/banner.js";
 import * as productFiltersBuilder from "../../utils/product/build.js";
 import * as orderFiltersBuilder from "../../utils/order/build.js";
 import * as bannerFiltersBuilder from "../../utils/banner/build.js";
-import {orderStatus} from "../../utils/enums/enums.js";
+import { orderStatus } from "../../utils/enums/enums.js";
 import { cloud } from "../../utils/multer/cloud.config.js";
 //Admin data Retrival
 
 /**
  * Retrieve all users with pagination and sorted by creation date
- * 
+ *
  * @route GET /admin/users
  * @param {Object} req - Express request object
  * @param {Object} req.query - Query parameters
@@ -30,21 +30,21 @@ import { cloud } from "../../utils/multer/cloud.config.js";
  * // Request: GET /admin/users?page=1&limit=10
  * // Response: { message: "all users", data: { docs: [...], total: 50, pages: 5, page: 1 } }
  */
-export const getAllUsers = async (req, res,next) => {
-    const options = {
-        page: req.query.page || 1,
-        limit: req.query.limit || 10,
-        sort: { createdAt: -1 },
-    };
+export const getAllUsers = async (req, res, next) => {
+  const options = {
+    page: req.query.page || 1,
+    limit: req.query.limit || 10,
+    sort: { createdAt: -1 },
+  };
 
-    const users = await User.paginate({}, options);
+  const users = await User.paginate({}, options);
 
-    return res.status(200).json({message:"all users",data:users}) 
-}
+  return res.status(200).json({ message: "all users", data: users });
+};
 
 /**
  * Retrieve a single user by their MongoDB ObjectId
- * 
+ *
  * @route GET /admin/users/:userId
  * @param {Object} req - Express request object
  * @param {Object} req.params - Route parameters
@@ -61,22 +61,20 @@ export const getAllUsers = async (req, res,next) => {
  * // Error: { message: "user not found" }
  */
 export const getUserById = async (req, res, next) => {
-    const {id} = req.params;
-    const user = await User.findById(id);
-    if (!user) {
-        return next(new Error("user not found"),{cause: 404});
-    }
-    return res.status(200).json({message:"user found",data:user})
-}
-
-
+  const { id } = req.params;
+  const user = await User.findById(id);
+  if (!user) {
+    return next(new Error("user not found"), { cause: 404 });
+  }
+  return res.status(200).json({ message: "user found", data: user });
+};
 
 /**
  * Restrict/soft-delete a user by setting isDeleted flag to true
- * 
+ *
  * User data remains in database but user cannot access their account
  * This is a soft delete operation - data can be restored with approveUser
- * 
+ *
  * @route PATCH /admin/users/:userId/restrict
  * @param {Object} req - Express request object
  * @param {Object} req.params - Route parameters
@@ -92,14 +90,19 @@ export const getUserById = async (req, res, next) => {
  * // Response: { message: "user restricted", data: { _id: "...", isDeleted: true, ... } }
  * // Error: { message: "user not found" }
  */
-export const restrictUser = async (req, res,next) => {
-    const {id} = req.params;
-    const user = await User.findByIdAndUpdate(id,{isDeleted:true},{new:true}).lean("-password");
-    if (!user) {
-        return next(new Error("user not found"),{cause: 404});
-    }   
-    return res.status(200).json({message:"user restricted",data:user})
-}
+export const restrictUser = async (req, res, next) => {
+  const { id } = req.params;
+  const user = await User.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  ).lean("-password");
+  if (!user) {
+    return next(new Error("user not found"), { cause: 404 });
+  }
+  return res.status(200).json({ message: "user restricted", data: user });
+};
+
 /**
  * Approve/un-restrict a user by setting isDeleted flag to false
  * This restores access to the user's account if they were previously restricted
@@ -107,61 +110,76 @@ export const restrictUser = async (req, res,next) => {
  */
 
 export const approveUser = async (req, res, next) => {
-    const {id} = req.params;
-    const user = await User.findByIdAndUpdate(id,{isDeleted:false},{new:true});
-    if (!user) {
-        return next(new Error("user not found"),{cause: 404});
-    }
-    return res.status(200).json({message:"user approved",data:user})
-}
+  const { id } = req.params;
+  const user = await User.findByIdAndUpdate(
+    id,
+    { isDeleted: false },
+    { new: true },
+  );
+  if (!user) {
+    return next(new Error("user not found"), { cause: 404 });
+  }
+  return res.status(200).json({ message: "user approved", data: user });
+};
 
 export const getAllProducts = async (req, res) => {
-    const options = {
-        page: req.query.page || 1,
-        limit: req.query.limit || 10,
-        sort: productFiltersBuilder.sortObject(req.query.sort)
-    };
+  const options = {
+    page: req.query.page || 1,
+    limit: req.query.limit || 10,
+    sort: productFiltersBuilder.sortObject(req.query.sort),
+  };
 
+  const filter = productFiltersBuilder.filterObject(req.query);
 
-    const filter = productFiltersBuilder.filterObject(req.query);
+  const products = await Product.paginate(filter, options);
 
-    const products = await Product.paginate(filter, options);
+  return res.status(200).json({
+    message: "Products fetched successfully",
+    products: products,
+  });
+};
 
-    return res.status(200).json({
-        message: "all products",    
-        data: products
-    });
-}
+export const getProductById = async (req, res, next) => {
+  const { id } = req.params;
+  const product = await Product.findById(id);
+  if (!product) {
+    return next(new Error("product not found"), { cause: 404 });
+  }
+  return res.status(200).json({ message: "product found", data: product });
+};
 
-export const getProductById = async (req, res, next) => { 
-    const {id} = req.params;
-    const product = await Product.findById(id);
-    if (!product) {
-        return next(new Error("product not found"),{cause: 404});
-    }
-    return res.status(200).json({message:"product found",data:product})
-}
-
-export const deleteProduct = async (req, res,next) => {
-    const {id} = req.params;
-    const product = await Product.findByIdAndUpdate(id,{isDeleted:true},{new:true});    // console.log(product);
-    if (!product) {
-        return next(new Error("product not found"),{cause: 404});
-    }
-    return res.status(200).json({success:true, message:"product deleted",data:product})
-}
-export const recoverProduct = async (req,res,next)=> {
-    const {id} = req.params;
-    const product = await Product.findByIdAndUpdate(id,{isDeleted:false},{new:true});    // console.log(product);
-    if (!product) {
-        return next(new Error("product not found"),{cause: 404});
-    }
-    return res.status(200).json({success:true, message:"product recovered",data:product})
-}
+export const deleteProduct = async (req, res, next) => {
+  const { id } = req.params;
+  const product = await Product.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true },
+  ); // console.log(product);
+  if (!product) {
+    return next(new Error("product not found"), { cause: 404 });
+  }
+  return res
+    .status(200)
+    .json({ success: true, message: "product deleted", data: product });
+};
+export const recoverProduct = async (req, res, next) => {
+  const { id } = req.params;
+  const product = await Product.findByIdAndUpdate(
+    id,
+    { isDeleted: false },
+    { new: true },
+  ); // console.log(product);
+  if (!product) {
+    return next(new Error("product not found"), { cause: 404 });
+  }
+  return res
+    .status(200)
+    .json({ success: true, message: "product recovered", data: product });
+};
 
 /**
  * Retrieve all orders with pagination and sorting
- * 
+ *
  * @route GET /admin/orders
  * @param {Object} req - Express request object
  * @param {Object} req.query - Query parameters
@@ -181,32 +199,32 @@ export const recoverProduct = async (req,res,next)=> {
  * // Response: { message: "Orders fetched successfully", orders: { docs: [...], total: 50, pages: 5, page: 1 } }
  */
 export const getAllOrders = async (req, res) => {
-    const options = {
-        page: req.query.page || 1,
-        limit: req.query.limit || 10,
-        sort: orderFiltersBuilder.sortObject(req.query.sort)
-    };
+  const options = {
+    page: req.query.page || 1,
+    limit: req.query.limit || 10,
+    sort: orderFiltersBuilder.sortObject(req.query.sort),
+  };
 
-    const filter = orderFiltersBuilder.filterObject(req.query);
+  const filter = orderFiltersBuilder.filterObject(req.query);
 
-    const orders = await Order.paginate(filter, options);
+  const orders = await Order.paginate(filter, options);
 
-    return res.status(200).json({
-        message: "Orders fetched successfully",
-        orders: orders
-    });
-}
+  return res.status(200).json({
+    message: "Orders fetched successfully",
+    orders: orders,
+  });
+};
 export const getOrderById = async (req, res, next) => {
-    const {id} = req.params;
-    const order = await Order.findById(id);
-    if (!order) {
-        return next(new Error("Order not found"), {cause: 404});
-    }
-    return res.status(200).json({message:"Order found",data:order})
-}   
+  const { id } = req.params;
+  const order = await Order.findById(id);
+  if (!order) {
+    return next(new Error("Order not found"), { cause: 404 });
+  }
+  return res.status(200).json({ message: "Order found", data: order });
+};
 /**
  * Update order status
- * 
+ *
  * @route PATCH /admin/orders/:orderId
  * @param {Object} req - Express request object
  * @param {Object} req.params - Route parameters
@@ -224,26 +242,33 @@ export const getOrderById = async (req, res, next) => {
  * // Request: PATCH /admin/orders/507f1f77bcf86cd799439011
  * // Body: { "orderStatus": "shipped" }
  * // Response: { message: "Order status updated", order: { _id: "...", status: "shipped", ... } }
+ * // Error: { message: "order not found" }
  */
 export const updateOrderStatus = async (req, res, next) => {
-    const {id} = req.params;
-    const {orderStatus: newStatus} = req.body;
-    
-    const validStatuses = Object.values(orderStatus);
-    if (!validStatuses.includes(newStatus)) {
-        return next(new Error("Invalid order status"));
-    }
-    
-    const order = await Order.findByIdAndUpdate(id, {status: newStatus}, {new: true});
-    if (!order) {
-        return next(new Error("order not found"),{cause: 404});
-    }
-    return res.status(200).json({message: "Order status updated", order: order});
-}
+  const { id } = req.params;
+  const { orderStatus: newStatus } = req.body;
+
+  const validStatuses = Object.values(orderStatus);
+  if (!validStatuses.includes(newStatus)) {
+    return next(new Error("Invalid order status"));
+  }
+
+  const order = await Order.findByIdAndUpdate(
+    id,
+    { status: newStatus },
+    { new: true },
+  );
+  if (!order) {
+    return next(new Error("order not found"), { cause: 404 });
+  }
+  return res
+    .status(200)
+    .json({ message: "Order status updated", order: order });
+};
 
 /**
  * Retrieve all banners with pagination and sorting
- * 
+ *
  * @route GET /admin/banners
  * @param {Object} req - Express request object
  * @param {Object} req.query - Query parameters
@@ -262,25 +287,25 @@ export const updateOrderStatus = async (req, res, next) => {
  * // Response: { message: "Banners fetched successfully", banners: { docs: [...], total: 50, pages: 5, page: 1 } }
  */
 export const getAllBanners = async (req, res) => {
-    const options = {
-        page: req.query.page || 1,
-        limit: req.query.limit || 10,
-        sort: bannerFiltersBuilder.sortObject(req.query.sort)
-    };
+  const options = {
+    page: req.query.page || 1,
+    limit: req.query.limit || 10,
+    sort: bannerFiltersBuilder.sortObject(req.query.sort),
+  };
 
-    const filter = bannerFiltersBuilder.filterObject(req.query);
+  const filter = bannerFiltersBuilder.filterObject(req.query);
 
-    const banners = await Banner.paginate(filter, options);
+  const banners = await Banner.paginate(filter, options);
 
-    return res.status(200).json({
-        message: "Banners fetched successfully",
-        banners: banners
-    });
-}
+  return res.status(200).json({
+    message: "Banners fetched successfully",
+    banners: banners,
+  });
+};
 
 /**
  * Create a new banner with image upload
- * 
+ *
  * @route POST /admin/banners
  * @param {Object} req - Express request object
  * @param {Object} req.body - Request body
@@ -299,33 +324,33 @@ export const getAllBanners = async (req, res) => {
  * // Response: { message: "Banner created successfully", banner: { _id: "...", title: "Summer Sale", ... } }
  */
 export const createBanner = async (req, res, next) => {
-    const {title, link} = req.body;
+  const { title, link } = req.body;
 
-    if (!req.file) {
-        return next(new Error("Image is required"), { cause: 400 });
-    }
+  if (!req.file) {
+    return next(new Error("Image is required"), { cause: 400 });
+  }
 
-    const { secure_url, public_id } = await cloud.uploader.upload(req.file.path, {
-        folder: `${process.env.CLOUD_NAME}/banners/`
-    });
+  const { secure_url, public_id } = await cloud.uploader.upload(req.file.path, {
+    folder: `${process.env.CLOUD_NAME}/banners/`,
+  });
 
-    const banner = await Banner.create({
-        title, 
-        link, 
-        image: { secure_url, public_id }, 
-        isActive: true,
-        createdBy: req.user._id
-    });
-    
-    return res.status(201).json({
-        message: "Banner created successfully",
-        banner: banner
-    });
-}
+  const banner = await Banner.create({
+    title,
+    link,
+    image: { secure_url, public_id },
+    isActive: true,
+    createdBy: req.user._id,
+  });
+
+  return res.status(201).json({
+    message: "Banner created successfully",
+    banner: banner,
+  });
+};
 
 /**
  * Retrieve a single banner by ID
- * 
+ *
  * @route GET /admin/banners/:bannerId
  * @param {Object} req - Express request object
  * @param {Object} req.params - Route parameters
@@ -341,22 +366,22 @@ export const createBanner = async (req, res, next) => {
  * // Response: { message: "Banner found", banner: { _id: "507f1f77bcf86cd799439011", title: "Summer Sale", ... } }
  */
 export const getBannerById = async (req, res, next) => {
-    const {id} = req.params;
-    const banner = await Banner.findById(id);
-    
-    if (!banner) {
-        return next(new Error("Banner not found"),{cause: 404});
-    }
-    
-    return res.status(200).json({
-        message: "Banner found",
-        banner: banner
-    });
-}
+  const { id } = req.params;
+  const banner = await Banner.findById(id);
+
+  if (!banner) {
+    return next(new Error("Banner not found"), { cause: 404 });
+  }
+
+  return res.status(200).json({
+    message: "Banner found",
+    banner: banner,
+  });
+};
 
 /**
  * Update a banner with optional image upload
- * 
+ *
  * @route PATCH /admin/banners/:id
  * @param {Object} req - Express request object
  * @param {Object} req.params - Route parameters
@@ -378,41 +403,44 @@ export const getBannerById = async (req, res, next) => {
  * // Response: { message: "Banner updated successfully", banner: { _id: "...", title: "Winter Sale", ... } }
  */
 export const updateBanner = async (req, res, next) => {
-    const {id} = req.params;
-    const {title, link, isActive} = req.body;
-    
-    const banner = await Banner.findById(id);
-    if (!banner) {
-        return next(new Error("Banner not found"),{cause: 404});
-    }
+  const { id } = req.params;
+  const { title, link, isActive } = req.body;
 
-    if (title) banner.title = title;
-    if (link) banner.link = link;
-    if (isActive !== undefined) banner.isActive = isActive;
-    
-    if (req.file) {
-        const { secure_url, public_id } = await cloud.uploader.upload(req.file.path, {
-            folder: `${process.env.CLOUD_NAME}/banners`
-        });
-        await cloud.uploader.destroy(banner.image.public_id);
-        
-        banner.image = { secure_url, public_id };
-    }
-    
-    await banner.save();
-    
-    return res.status(200).json({
-        message: "Banner updated successfully",
-        banner: banner
-    });
-}
+  const banner = await Banner.findById(id);
+  if (!banner) {
+    return next(new Error("Banner not found"), { cause: 404 });
+  }
+
+  if (title) banner.title = title;
+  if (link) banner.link = link;
+  if (isActive !== undefined) banner.isActive = isActive;
+
+  if (req.file) {
+    const { secure_url, public_id } = await cloud.uploader.upload(
+      req.file.path,
+      {
+        folder: `${process.env.CLOUD_NAME}/banners`,
+      },
+    );
+    await cloud.uploader.destroy(banner.image.public_id);
+
+    banner.image = { secure_url, public_id };
+  }
+
+  await banner.save();
+
+  return res.status(200).json({
+    message: "Banner updated successfully",
+    banner: banner,
+  });
+};
 
 /**
  * Soft delete a banner by setting isDeleted flag to true
- * 
+ *
  * Banner data remains in database but is considered deleted
  * This is a soft delete operation - data can be restored if needed
- * 
+ *
  * @route DELETE /admin/banners/:bannerId
  * @param {Object} req - Express request object
  * @param {Object} req.params - Route parameters
@@ -427,27 +455,35 @@ export const updateBanner = async (req, res, next) => {
  * // Response: { message: "Banner deleted successfully" }
  */
 export const deActivateBanner = async (req, res, next) => {
-    const {id} = req.params;
-    const banner = await Banner.findByIdAndUpdate(id, {isActive: false}, {new: true});
-    
-    if (!banner) {
-        return next(new Error("Banner not found"),{cause: 404});
-    }
-    
-    return res.status(200).json({
-        message: "Banner deleted successfully"
-    });
-}
+  const { id } = req.params;
+  const banner = await Banner.findByIdAndUpdate(
+    id,
+    { isActive: false },
+    { new: true },
+  );
+
+  if (!banner) {
+    return next(new Error("Banner not found"), { cause: 404 });
+  }
+
+  return res.status(200).json({
+    message: "Banner deleted successfully",
+  });
+};
 export const activateBanner = async (req, res, next) => {
-    const {id} = req.params;
-    const banner = await Banner.findByIdAndUpdate(id, {isActive: true}, {new: true});
-    
-    if (!banner) {
-        return next(new Error("Banner not found"),{cause: 404});
-    }
-    
-    return res.status(200).json({
-        message: "Banner activated successfully",
-        banner: banner
-    });
-}
+  const { id } = req.params;
+  const banner = await Banner.findByIdAndUpdate(
+    id,
+    { isActive: true },
+    { new: true },
+  );
+
+  if (!banner) {
+    return next(new Error("Banner not found"), { cause: 404 });
+  }
+
+  return res.status(200).json({
+    message: "Banner activated successfully",
+    banner: banner,
+  });
+};
