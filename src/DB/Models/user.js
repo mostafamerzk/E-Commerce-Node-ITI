@@ -38,7 +38,7 @@ const user = new mongoose.Schema(
     isAcctivated: { type: Boolean, default: false },
 
     role: { type: String, enum: Object.values(roles), default: "user" },
-
+    isSeller: { type: Boolean, default: false },
     passwordChangeTime: Date,
     isDeleted: { type: Boolean, default: false },
     isLogged: { type: Boolean, default: false },

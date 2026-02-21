@@ -7,13 +7,13 @@ export const activateAcc = new EventEmitter();
 
 activateAcc.on("activateAcc", async (email, subject) => {
   const token = generateToken({ payload: { email } });
-  const link = `http://localhost:3000/auth/acctivate_account/${token}`;
+  const link = `https://e-commerce-node-iti.vercel.app/auth/acctivate_account/${token}`;
   await sendEmail(email, subject, { html: html(link) });
 });
 
 activateAcc.on("verifyUpdatedEmail", async (email, id, subject) => {
   const token = generateToken({ payload: { email, id } });
-  const link = `http://localhost:3000/user/verifyUpdatedEmail/${token}`;
+  const link = `https://e-commerce-node-iti.vercel.app/user/verifyUpdatedEmail/${token}`;
   await sendEmail(email, subject, { html: html(link) });
 });
 
