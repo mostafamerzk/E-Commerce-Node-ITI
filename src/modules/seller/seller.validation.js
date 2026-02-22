@@ -1,17 +1,9 @@
 import Joi from "joi";
 
 export const createSellerSchema = Joi.object({
-  userId: Joi.string()
-    .hex()
-    .length(24)
-    .messages({
-      "string.base": "User ID must be a string",
-      "string.hex": "User ID must be a valid ObjectId",
-      "string.length": "User ID must be 24 characters",
-      "any.required": "User ID is required"
-    }),
+ 
 
-  storeName: Joi.string()
+  storename: Joi.string()
     .trim()
     .min(3)
     .max(50)
@@ -28,14 +20,7 @@ export const createSellerSchema = Joi.object({
     .optional()
     .allow(""),
 
-  storeImage: Joi.string()
-    .uri()
-    .pattern(/\.(png|jpg|jpeg|webp)$/i)
-    .optional()
-    .messages({
-      "string.uri": "Store image must be a valid URL",
-      "string.pattern.base": "Store image must be png, jpg, jpeg, or webp"
-    }),
+ 
 
   phone: Joi.string()
     .pattern(/^\+\d{10,15}$/)

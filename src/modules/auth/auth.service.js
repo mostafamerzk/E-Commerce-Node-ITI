@@ -1,5 +1,5 @@
 import { User } from "../../DB/Models/user.js";
-import { providers } from "../../utils/enums/enums.js";
+import { providers, roles } from "../../utils/enums/enums.js";
 import { activateAcc } from "../../utils/email/email.event.js";
 import { compareHash, hash } from "../../utils/hashing/hash.js";
 import { generateToken, verifyToken } from "../../utils/token/token.js";
@@ -13,7 +13,6 @@ export const register = async (req, res, next) => {
   const existingUser = await User.findOne({ email: req.body.email });
   if (existingUser)
     return next(new Error("Email already in use", { cause: 400 }));
-
   // create a new user
   await User.create({
     ...req.body,

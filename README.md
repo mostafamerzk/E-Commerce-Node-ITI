@@ -1,108 +1,122 @@
-# E-Commerce API 🛒
+# E-Commerce API
 
-A comprehensive E-Commerce RESTful API built with **Node.js** and **Express.js**, utilizing **MongoDB Atlas** for scalable and secure data storage.
+A comprehensive E-Commerce RESTful API built with Node.js and Express.js, utilizing MongoDB Atlas for scalable and secure data storage. This project features a full-featured online store backend, including user authentication, product management, shopping cart, order processing, and seller management.
 
-This project features a full-featured online store backend, including user authentication, product management, shopping cart, order processing, and reviews.
+## Key Features
 
-## 🚀 Key Features
+### Authentication and Authorization
 
-- **Robust Authentication**: JWT-based authentication with Access & Refresh tokens.
-- **Role-Based Access Control (RBAC)**: secure endpoints for User, Seller, and Admin roles.
-- **User Management**: Profile updates, password reset/change with OTP, email verification, and soft deletion.
-- **Product Catalog**: Advanced product management with categories, sub-categories, search, filtering, sorting, and pagination.
-- **Shopping Cart**: Real-time cart management with stock validation and total price calculation.
-- **Order Processing**: Complete order lifecycle (Pending → Processing → Shipped → Delivered/Cancelled).
-- **Payment Integration**: Support for multiple payment methods (Credit Card, PayPal, COD, Wallet).
-- **Reviews & Ratings**: User-generated reviews and dynamic product ratings.
-- **Image Management**: Optimized image uploads and storage using **Cloudinary**.
-- **Security**: Data encryption, hashing, and secure headers.
-- **Communication**: Email notifications for registration, order updates, and password resets via **Nodemailer**.
+- Robust Authentication: JWT-based authentication with Access and Refresh tokens.
+- Google OAuth: Integration with Google for simplified user registration and login.
+- Role-Based Access Control (RBAC): Secure endpoints with granular permissions for User, Seller, and Admin roles.
 
-## 🛠️ Technology Stack
+### User Management
 
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB Atlas (Cloud-hosted NoSQL)
-- **ODM**: Mongoose
-- **Validation**: Joi
-- **File Uploads**: Multer
-- **Cloud Storage**: Cloudinary
-- **Email Service**: Nodemailer
+- Profile Management: Comprehensive profile updates, including profile and cover image uploads to Cloudinary.
+- Account Security: Password reset and change flows using OTP (One-Time Password) via email.
+- Account Lifecycle: Email verification for account activation, account freezing (soft-delete), and reactivation flows.
 
-## 📦 Installation & Setup
+### Seller and Marketplace
 
-1.  **Clone the repository:**
+- Seller Profiles: Special account type for vendors to manage their own store information.
+- Store Management: Dedicated store dashboard including store name, description, and branding.
+- Inventory Control: Interface for sellers to manage their own product listings, stock levels, and historical inventory.
 
-    ```bash
-    git clone https://github.com/mostafamerzk/E-Commerce-Node-ITI.git
-    cd E-Commerce-Node-ITI
-    ```
+### Product Catalog
 
-2.  **Install dependencies:**
+- Advanced Management: Complete CRUD operations for products, categories, and sub-categories.
+- Discovery: Powerful search by keyword, advanced filtering (price ranges, categories), and specialized sorting.
+- Presentation: Dynamic pagination for large catalogs and optimized image galleries powered by Cloudinary.
 
-    ```bash
-    npm install
-    ```
+### Purchase Flow
 
-3.  **Environment Configuration:**
-    Create a `.env` file in the root directory and configure the following variables:
+- Shopping Cart: Persistent cart management with real-time stock validation and price calculations.
+- Checkout System: Detailed order summaries with price breakdowns including subtotal, shipping, and taxes.
+- Payment Integration: Full integration with Stripe including secure Checkout Sessions and asynchronous Webhook handling for payment confirmation.
 
-    ```env
-    PORT=3000
-    CONNECTION_URI=<Your MongoDB Atlas Connection String>
+### Order Processing
 
-    # 🔐 Security
-    SALT_ROUND=8
-    ACCESS_TOKEN_EXPIRE=1d
-    REFRESH_TOKEN_EXPIRE=7d
-    TOKEN_SECRET=<Your Secret Key>
+- Lifecycle Tracking: Complete order state management (Pending, Processing, Shipped, Delivered, Cancelled).
+- Stock Integrity: Automatic stock deduction upon purchase and restoration upon cancellation.
+- Communications: Automated email notifications for order placement and status updates.
 
-    # 📧 Email Service
-    EMAIL=<Your Gmail Address>
-    EMAIL_PASSWORD=<Your App Password>
+### Community and Feedback
 
-    # ☁️ Cloudinary
-    CLOUD_NAME=<Your Cloudinary Cloud Name>
-    API_KEY=<Your Cloudinary API Key>
-    API_SECRET=<Your Cloudinary API Secret>
+- Reviews and Ratings: Multi-dimensional review system allowing one review per user per product.
+- Dynamic Metrics: Automatic calculation of average ratings and review counts on the product level.
 
-    # 🌐 Google Auth (Optional)
-    WEB_CLIENT_ID=<Your Google Client ID>
-    ```
+### Admin and Content Management
 
-4.  **Run the application:**
+- User Oversight: Administrative tools to list, search, restrict, or re-approve users.
+- Content Management: CRUD operations for homepage banners and promotional content.
+- Global Management: Full visibility into all products and orders across the system.
 
-    ```bash
-    # Development mode (with nodemon)
-    npm run dev
+## Technology Stack
 
-    # Production mode
-    npm start
-    ```
+- Runtime: Node.js
+- Framework: Express.js
+- Database: MongoDB Atlas
+- ODM: Mongoose
+- Validation: Joi
+- File Uploads: Multer and Cloudinary
+- Payment Gateway: Stripe
+- Email Service: Nodemailer
 
-## 📂 Project Structure
+## Project Structure
 
-```bash
+```text
 src/
-├── DB/                 # Database connection & Mongoose Models
+├── DB/                 # Database connection and Mongoose Models
 ├── middleware/         # Auth, validation, and error handling middleware
-├── modules/            # Feature modules (User, Auth, Product, Cart...)
+├── modules/            # Feature modules (User, Auth, Product, Cart, Seller, Payment...)
 │   └── User/           # Example module structure
 │       ├── user.controller.js
 │       ├── user.service.js
 │       └── user.validation.js
-└── utils/              # Helper utilities (Email, Hashing, Tokens...)
+└── utils/              # Helper utilities (Email, Hashing, Tokens, Stripe...)
 ```
 
-## 👥 Authors
+## Installation and Setup
 
-Built with ❤️ by the **ITI Node.js E-Commerce Team**:
+1. Clone the repository:
 
-- **Mostafa**: Product Management, Categories, & Payment Integration
-- **Fathi**: Shopping Cart, Checkout, & Order Management
-- **Mokhtar**: Wishlist & Reviews System
-- **Issac**: Admin Dashboard & Seller Management
+   ```bash
+   git clone https://github.com/mostafamerzk/E-Commerce-Node-ITI.git
+   cd E-Commerce-Node-ITI
+   ```
 
-### 🎓 Supervisor
+2. Install dependencies:
 
-**Dr. Mariam Abdelhady**
+   ```bash
+   npm install
+   ```
+
+3. Environment Configuration:
+   Create a .env file in the root directory and configure the variables as shown in the .env.example (ensure you include STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET).
+
+4. Run the application:
+
+   ```bash
+   # Development mode
+   npm run dev
+
+   # Production mode
+   npm start
+   ```
+
+## Deployment
+
+The application is configured for deployment on Vercel. Database hosting is handled by MongoDB Atlas, and media assets are stored on Cloudinary.
+
+## Authors
+
+Built by the ITI-intake-46 Node.js E-Commerce Team:
+
+- Mostafa: Order Management, Categories, and Payment Integration
+- Fathi: Shopping Cart, Checkout, and Product Management
+- Mokhtar: Wishlist and Seller Management
+- Issac: Admin Dashboard and Reviews System
+
+### Supervisor
+
+Dr. Mariam Abdelhady

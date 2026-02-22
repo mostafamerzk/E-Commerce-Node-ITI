@@ -24,16 +24,10 @@ sellerRouter.patch(
 
 sellerRouter.get("/profile", getSellerProfileService);
 
-// ========================================
-// GET /seller/products
-// جلب منتجات Seller
-// ========================================
+
 sellerRouter.get("/products", getSellerProductsService);
 
-// ========================================
-// GET /seller/inventory
-// نظرة عامة على stock
-// ========================================
+
 sellerRouter.get("/inventory", getSellerInventoryService);
 
 export default sellerRouter;

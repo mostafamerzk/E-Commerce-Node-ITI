@@ -1,55 +1,40 @@
 import { Product } from "../../DB/Models/product.js";
 import { User } from "../../DB/Models/user.js";
+import { Order } from "../../DB/Models/order.js";
 
 
 export const upsertSellerProfileService = async (req, res) => {
-  try {
-    const { storeName, phone, storeDescription, storeImage } = req.body;
+  const { storename, phone, storeDescription } = req.body;
 
-    let seller = await User.findOne({ userId: req.user._id });
-    if (seller) {
-      seller.storeName = storeName ?? seller.storeName;
-      seller.phone = phone ?? seller.phone;
-      seller.storeDescription = storeDescription ?? seller.storeDescription;
-      seller.storeImage = storeImage ?? seller.storeImage;
+  const user = await User.findById(req.user._id);
 
-      await User.save();
-    } else {
-      seller = await User.create({
-        userId: req.user._id,
-        storeName,
-        phone,
-        storeDescription,
-        storeImage
-      });
-      await User.findByIdAndUpdate(req.user._id,{role:"seller"},{new:true})
+  if (!user)
+    return res.status(404).json({ message: "User not found" });
 
-    }
+  if (user.role === "seller")
+    return res.status(400).json({ message: "Already seller" });
 
-    return res.status(200).json({
-      message: "Seller profile updated",
-      user: seller
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "Internal Server Error",
-      error: error.message
-    });
-  }
+  user.storename = storename;
+  user.phone = phone;
+  user.storeDescription = storeDescription;
+  //user.storeImage = storeImage;
+
+  user.role = "seller";
+
+  await user.save();
+
+  res.status(200).json({
+    message: "Seller profile updated",
+  user
+  });
 };
 
 
 export const getSellerProfileService = async (req, res) => {
   try {
-    const seller = await Seller.findOne({ userId: req.user._id }).populate(
-      "userId",
-      "name email phone"
-    );
-
-    if (!seller) {
-      return res.status(404).json({ message: "Seller profile not found" });
-    }
+    const seller = await User.findById(req.user._id)
+if(seller.role!="seller")
+  return res.status(404).json({ message: "you should be seller" });
 
     return res.status(200).json({
       message: "Profile fetched",
@@ -67,7 +52,7 @@ export const getSellerProfileService = async (req, res) => {
 
 export const getSellerProductsService = async (req, res) => {
   try {
-    let seller = await Seller.findOne({ userId: req.user._id });
+    let seller = await User.findOne({ _id: req.user._id,role:"seller" });
 if(!seller)
   return res.status(404).json("seller not found")
 
@@ -86,25 +71,44 @@ if(!seller)
   }
 };
 
-/**
- * GET /seller/inventory
- * نظرة عامة على المخزون لكل المنتجات
- */
 export const getSellerInventoryService = async (req, res) => {
   try {
-    const products = await Product.find({ sellerId: req.user._id }).select(
-      "name stock sold"
+    const userId = req.user._id;
+
+    const products = await Product.find({ createdBy: userId }).select(
+      "title stock"
     );
 
-    const inventory = products.map((p) => ({
+    const soldData = await Order.aggregate([
+      {
+        $match: {
+          sellerId: userId,
+          orderStatus: { $in: [orderStatus.completed, orderStatus.pending] }
+        }
+      },
+      { $unwind: "$products" },
+      {
+        $group: {
+          _id: "$products.productId",
+          sold: { $sum: "$products.quantity" }
+        }
+      }
+    ]);
+
+    const soldMap = {};
+    soldData.forEach(item => {
+      soldMap[item._id.toString()] = item.sold;
+    });
+
+    const inventory = products.map(p => ({
       productId: p._id,
-      title: p.name,
+      title: p.title,
       stock: p.stock || 0,
-      sold: p.sold || 0
+      sold: soldMap[p._id.toString()] || 0
     }));
 
     return res.status(200).json({
-      message: "Inventory fetched",
+      message: "Inventory fetched successfully",
       inventory
     });
   } catch (error) {
