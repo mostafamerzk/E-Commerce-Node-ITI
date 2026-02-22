@@ -3,6 +3,7 @@ import { hash } from "../../utils/hashing/hash.js";
 import mongoosePaginate from "mongoose-paginate-v2";
 
 import { roles, providers } from "../../utils/enums/enums.js";
+// import { required } from "joi";
 const user = new mongoose.Schema(
   {
     userName: {
@@ -38,7 +39,6 @@ const user = new mongoose.Schema(
     isAcctivated: { type: Boolean, default: false },
 
     role: { type: String, enum: Object.values(roles), default: "user" },
-    isSeller: { type: Boolean, default: false },
     passwordChangeTime: Date,
     isDeleted: { type: Boolean, default: false },
     isLogged: { type: Boolean, default: false },
@@ -48,7 +48,11 @@ const user = new mongoose.Schema(
       default: providers.system,
     },
 
-    phone: { type: String, default: "" },
+    phone: { type: String, default: "",
+      required: function () {
+        return this.role === "seller";
+      }
+     },
     address: [
       {
         street: { type: String, default: "" },
@@ -63,6 +67,17 @@ const user = new mongoose.Schema(
         ref: "Products",
       },
     ],
+    storename:{
+      type:String,
+      required:function () {
+        return this.role === "seller";
+    }
+  },storeDescription: {
+    type: String,
+    required: function () {
+      return this.role === "seller";
+    }
+  },
   },
   { timestamps: true },
 );
