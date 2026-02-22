@@ -93,10 +93,10 @@ adminRoutes.route("/banners")
         isAuthorized(roles.admin),
         asyncHandler(adminService.getAllBanners))
     .post(
-        validation(adminValidation.createBannerSchema),
         asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         uploadCloud(fileValidations.Image).single("image"),
+        validation(adminValidation.createBannerSchema),
         asyncHandler(adminService.createBanner))
 
 adminRoutes.route("/banners/:id")
@@ -106,10 +106,10 @@ adminRoutes.route("/banners/:id")
         isAuthorized(roles.admin),
         asyncHandler(adminService.getBannerById))
     .patch(
-        validation(adminValidation.updateBannerSchema),
         asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         uploadCloud(fileValidations.Image).single("image"),
+        validation(adminValidation.updateBannerSchema),
         asyncHandler(adminService.updateBanner))
     .delete(
         validation(adminValidation.getByIdSchema),
@@ -123,4 +123,3 @@ adminRoutes.route("/banners/:id/activate")
         asyncHandler(isAuthenticated),
         isAuthorized(roles.admin),
         asyncHandler(adminService.activateBanner))
-
