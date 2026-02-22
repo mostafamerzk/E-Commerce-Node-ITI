@@ -6,9 +6,11 @@ import userRouter from "./User/user.controller.js";
 import categoryRouter from "./category/category.controller.js";
 import cors from "cors";
 import { wishlistRouter } from "./wishlist/wishlist.controller.js";
+import sellerrouter from "./seller/seller.controller.js";
 import paymentRouter from "./payment/payment.controller.js";
 import { adminRoutes } from "./admin/admin.controller.js";
 import reviewRoutes from "./review/review.controller.js";
+import orderRouter from "./order/order.controller.js";
 
 const bootstrap = async (app, express) => {
   app.use(cors());
@@ -19,12 +21,18 @@ const bootstrap = async (app, express) => {
   app.use("/admin", adminRoutes);
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
+  app.use("/wish", wishlistRouter);
+  app.use("/seller", sellerrouter);
+
+
   app.use("/cart", cartRouter);
   app.use("/category", categoryRouter);
   app.use("/wish", wishlistRouter);
   app.use("/payment", paymentRouter);
-  app.use("/product" ,productRouter)
+  app.use("/product", productRouter);
   app.use("/review", reviewRoutes);
+  app.use("/order", orderRouter);
+
   // not found route
   app.use((req, res) => {
     return res.status(404).json({ message: "Route not found" });

@@ -7,6 +7,7 @@ import * as orderFiltersBuilder from "../../utils/order/build.js";
 import * as bannerFiltersBuilder from "../../utils/banner/build.js";
 import { orderStatus } from "../../utils/enums/enums.js";
 import { cloud } from "../../utils/multer/cloud.config.js";
+import { orderEvent } from "../../utils/email/email.event.js";
 //Admin data Retrival
 
 /**
@@ -64,7 +65,7 @@ export const getUserById = async (req, res, next) => {
   const { id } = req.params;
   const user = await User.findById(id);
   if (!user) {
-    return next(new Error("user not found"), { cause: 404 });
+    return next(new Error("user not found", { cause: 404 }));
   }
   return res.status(200).json({ message: "user found", data: user });
 };
@@ -98,7 +99,7 @@ export const restrictUser = async (req, res, next) => {
     { new: true },
   ).lean("-password");
   if (!user) {
-    return next(new Error("user not found"), { cause: 404 });
+    return next(new Error("user not found", { cause: 404 }));
   }
   return res.status(200).json({ message: "user restricted", data: user });
 };
@@ -117,7 +118,7 @@ export const approveUser = async (req, res, next) => {
     { new: true },
   );
   if (!user) {
-    return next(new Error("user not found"), { cause: 404 });
+    return next(new Error("user not found", { cause: 404 }));
   }
   return res.status(200).json({ message: "user approved", data: user });
 };
@@ -143,7 +144,7 @@ export const getProductById = async (req, res, next) => {
   const { id } = req.params;
   const product = await Product.findById(id);
   if (!product) {
-    return next(new Error("product not found"), { cause: 404 });
+    return next(new Error("product not found", { cause: 404 }));
   }
   return res.status(200).json({ message: "product found", data: product });
 };
@@ -154,9 +155,9 @@ export const deleteProduct = async (req, res, next) => {
     id,
     { isDeleted: true },
     { new: true },
-  ); // console.log(product);
+  );
   if (!product) {
-    return next(new Error("product not found"), { cause: 404 });
+    return next(new Error("product not found", { cause: 404 }));
   }
   return res
     .status(200)
@@ -168,9 +169,9 @@ export const recoverProduct = async (req, res, next) => {
     id,
     { isDeleted: false },
     { new: true },
-  ); // console.log(product);
+  );
   if (!product) {
-    return next(new Error("product not found"), { cause: 404 });
+    return next(new Error("product not found", { cause: 404 }));
   }
   return res
     .status(200)
@@ -218,7 +219,7 @@ export const getOrderById = async (req, res, next) => {
   const { id } = req.params;
   const order = await Order.findById(id);
   if (!order) {
-    return next(new Error("Order not found"), { cause: 404 });
+    return next(new Error("Order not found", { cause: 404 }));
   }
   return res.status(200).json({ message: "Order found", data: order });
 };
@@ -244,23 +245,55 @@ export const getOrderById = async (req, res, next) => {
  * // Response: { message: "Order status updated", order: { _id: "...", status: "shipped", ... } }
  * // Error: { message: "order not found" }
  */
+// Valid status transitions map
+const validTransitions = {
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["processing", "cancelled"],
+  processing: ["shipped", "cancelled"],
+  shipped: ["delivered", "returned"],
+  delivered: ["returned"],
+  cancelled: [],
+  returned: [],
+};
+
 export const updateOrderStatus = async (req, res, next) => {
   const { id } = req.params;
   const { orderStatus: newStatus } = req.body;
 
   const validStatuses = Object.values(orderStatus);
   if (!validStatuses.includes(newStatus)) {
-    return next(new Error("Invalid order status"));
+    return next(new Error("Invalid order status", { cause: 400 }));
   }
 
-  const order = await Order.findByIdAndUpdate(
-    id,
-    { status: newStatus },
-    { new: true },
-  );
+  const order = await Order.findById(id);
   if (!order) {
-    return next(new Error("order not found"), { cause: 404 });
+    return next(new Error("Order not found", { cause: 404 }));
   }
+
+  const currentStatus = order.orderStatus;
+  const allowed = validTransitions[currentStatus] || [];
+  if (!allowed.includes(newStatus)) {
+    return next(
+      new Error(`Cannot transition from "${currentStatus}" to "${newStatus}"`, {
+        cause: 400,
+      }),
+    );
+  }
+
+  order.orderStatus = newStatus;
+  await order.save();
+
+  // Send email notification on status change
+  const user = await User.findById(order.userId).select("email");
+  if (user) {
+    orderEvent.emit(
+      "orderStatusUpdate",
+      user.email,
+      order.orderNumber,
+      newStatus,
+    );
+  }
+
   return res
     .status(200)
     .json({ message: "Order status updated", order: order });
@@ -327,7 +360,7 @@ export const createBanner = async (req, res, next) => {
   const { title, link } = req.body;
 
   if (!req.file) {
-    return next(new Error("Image is required"), { cause: 400 });
+    return next(new Error("Image is required", { cause: 400 }));
   }
 
   const { secure_url, public_id } = await cloud.uploader.upload(req.file.path, {
@@ -370,7 +403,7 @@ export const getBannerById = async (req, res, next) => {
   const banner = await Banner.findById(id);
 
   if (!banner) {
-    return next(new Error("Banner not found"), { cause: 404 });
+    return next(new Error("Banner not found", { cause: 404 }));
   }
 
   return res.status(200).json({
@@ -408,7 +441,7 @@ export const updateBanner = async (req, res, next) => {
 
   const banner = await Banner.findById(id);
   if (!banner) {
-    return next(new Error("Banner not found"), { cause: 404 });
+    return next(new Error("Banner not found", { cause: 404 }));
   }
 
   if (title) banner.title = title;
@@ -463,7 +496,7 @@ export const deActivateBanner = async (req, res, next) => {
   );
 
   if (!banner) {
-    return next(new Error("Banner not found"), { cause: 404 });
+    return next(new Error("Banner not found", { cause: 404 }));
   }
 
   return res.status(200).json({
@@ -479,7 +512,7 @@ export const activateBanner = async (req, res, next) => {
   );
 
   if (!banner) {
-    return next(new Error("Banner not found"), { cause: 404 });
+    return next(new Error("Banner not found", { cause: 404 }));
   }
 
   return res.status(200).json({
