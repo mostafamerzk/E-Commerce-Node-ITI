@@ -47,11 +47,13 @@ export const getAllBannersSchema = Joi.object({
 })
 export const createBannerSchema = Joi.object({
     title: Joi.string().min(2).max(100).required(),
-    link: Joi.string().uri().required(),
+    link: Joi.string().required(),
+    file: Joi.any().required(),
 })  
 export const updateBannerSchema = Joi.object({
     id: Joi.string().custom(isValidObjectId).required(),
     title: Joi.string().min(2).max(100).optional(),
-    link: Joi.string().uri().optional(),
+    link: Joi.string().optional(),
+    file: Joi.any().optional(),
     isActive: Joi.boolean().optional()
 }).min(1);
