@@ -54,6 +54,7 @@ export const isAuthenticated = async (req, res, next) => {
 
     // Attach User to Request
     req.user = user;
+    console.log(1)
     next();
   } catch (error) {
     next(error);
