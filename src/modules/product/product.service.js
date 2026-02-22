@@ -210,7 +210,6 @@ export const updateProduct = async (req, res) => {
         )
     );
 
-    // 🔹 save new images
     product.images = uploads.map(img => ({
         secure_url: img.secure_url,
         public_id: img.public_id
