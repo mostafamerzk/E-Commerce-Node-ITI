@@ -33,7 +33,7 @@ export const login = async (req, res, next) => {
 
   // check for password
   if (!compareHash(password, user.password))
-    return next(new Error("invalid password!!", { cause: 401 }));
+    return next(new Error("invalid credentials!!", { cause: 401 }));
   user.isLogged = true;
   await user.save();
   return res.status(200).json({
