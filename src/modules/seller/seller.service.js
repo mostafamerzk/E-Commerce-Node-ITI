@@ -15,7 +15,7 @@ export const upsertSellerProfileService = async (req, res) => {
   user.phone = phone;
   user.storeDescription = storeDescription;
   //user.storeImage = storeImage;
-
+if(user.role=="user")
   user.role = "seller";
 
   await user.save();
@@ -30,7 +30,7 @@ export const upsertSellerProfileService = async (req, res) => {
 export const getSellerProfileService = async (req, res) => {
   try {
     const seller = await User.findById(req.user._id)
-if(seller.role!="seller")
+if(seller.role!="seller"&&seller.role!="admin")
   return res.status(404).json({ message: "you should be seller" });
 
     return res.status(200).json({
@@ -49,7 +49,7 @@ if(seller.role!="seller")
 
 export const getSellerProductsService = async (req, res) => {
   try {
-    let seller = await User.findOne({ _id: req.user._id,role:"seller" });
+    let seller = await User.findOne({ _id: req.user._id,role:{$in:["seller","admin"] }});
 if(!seller)
   return res.status(404).json("seller not found")
 
@@ -72,19 +72,17 @@ if(!seller)
 
 export const getSellerInventoryService = async (req, res) => {
   try {
-    const sellerId = req.user._id; // البائع الحالي
+    const createdBy = req.user._id; 
 
     const inventory = await Product.aggregate([
-      // 1️⃣ جلب المنتجات الخاصة بالبائع
-      { $match: { sellerId } },
+      { $match: { createdBy } },
 
-      // 2️⃣ جلب المبيعات من الـ Orders
       {
         $lookup: {
           from: "orders",
           let: { productId: "$_id" },
           pipeline: [
-            { $unwind: "$products" }, // نفك الـ array
+            { $unwind: "$products" },
             {
               $match: {
                 $expr: { $eq: ["$products.productId", "$$productId"] },
@@ -102,14 +100,12 @@ export const getSellerInventoryService = async (req, res) => {
         }
       },
 
-      // 3️⃣ لو مفيش مبيعات → sold = 0
       {
         $addFields: {
           sold: { $ifNull: [{ $arrayElemAt: ["$sales.sold", 0] }, 0] }
         }
       },
 
-      // 4️⃣ مشروع الحقول المطلوبة فقط
       {
         $project: {
           productId: "$_id",

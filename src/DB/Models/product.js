@@ -75,11 +75,11 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    // sellerId: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Users",
-    //   required: true
-    // }
+    sellerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Users",
+      required: true
+    }
   },
   { timestamps: true },
 );
