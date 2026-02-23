@@ -8,6 +8,7 @@ import {
   getSellerInventoryService
 } from "./seller.service.js";
 import { createSellerSchema } from "./seller.validation.js";
+import { asyncHandler } from "../../utils/error handling/asyncHandler.js";
 
 const sellerRouter = express.Router();
 
@@ -18,16 +19,16 @@ sellerRouter.use(isAuthenticated);
 sellerRouter.patch(
   "/profile",
   validation(createSellerSchema),
-  upsertSellerProfileService
+  asyncHandler(upsertSellerProfileService)
 );
 
 
-sellerRouter.get("/profile", getSellerProfileService);
+sellerRouter.get("/profile", asyncHandler(getSellerProfileService));
 
 
-sellerRouter.get("/products", getSellerProductsService);
+sellerRouter.get("/products", asyncHandler(getSellerProductsService));
 
 
-sellerRouter.get("/inventory", getSellerInventoryService);
+sellerRouter.get("/inventory", asyncHandler(getSellerInventoryService));
 
 export default sellerRouter;
