@@ -58,8 +58,8 @@ productRouter.patch(
 
 productRouter.delete(
   "/:productId",
-  validation(productIdSchema),
   isAuthenticated,
   isAuthorized(roles.admin, roles.seller),
+  validation(productIdSchema),
   asyncHandler(deleteProduct)
 );
