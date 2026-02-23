@@ -109,10 +109,7 @@ export const placeOrder = async (req, res, next) => {
   }
 
   // Clear cart
-  await Cart.findOneAndUpdate(
-    { userId: req.user._id },
-    { products: [], totalPrice: 0 },
-  );
+  await Cart.findOneAndUpdate({ userId: req.user._id }, { products: [] });
 
   // Send confirmation email
   orderEvent.emit(
