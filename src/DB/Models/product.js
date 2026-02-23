@@ -75,23 +75,22 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    sellerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
-      required: true
-    }
   },
   { timestamps: true },
 );
 productSchema.plugin(mongoosePaginate);
-productSchema.index({
-  title: "text",
-  description: "text" },{ 
-    weights:{ 
-      title: 5, 
-      description: 2 
-    }
-});
+productSchema.index(
+  {
+    title: "text",
+    description: "text",
+  },
+  {
+    weights: {
+      title: 5,
+      description: 2,
+    },
+  },
+);
 
 // auto-calculate finalPrice before saving
 productSchema.pre("save", function (next) {
