@@ -1,7 +1,7 @@
 import { Product } from "../../DB/Models/product.js";
 import { User } from "../../DB/Models/user.js";
 import { Order } from "../../DB/Models/order.js";
-
+import { orderStatus } from "../../utils/enums/enums.js";
 
 export const upsertSellerProfileService = async (req, res) => {
   const { storename, phone, storeDescription } = req.body;
@@ -10,9 +10,6 @@ export const upsertSellerProfileService = async (req, res) => {
 
   if (!user)
     return res.status(404).json({ message: "User not found" });
-
-  if (user.role === "seller")
-    return res.status(400).json({ message: "Already seller" });
 
   user.storename = storename;
   user.phone = phone;
@@ -71,51 +68,62 @@ if(!seller)
   }
 };
 
+
+
 export const getSellerInventoryService = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const sellerId = req.user._id; // البائع الحالي
 
-    const products = await Product.find({ createdBy: userId }).select(
-      "title stock"
-    );
+    const inventory = await Product.aggregate([
+      // 1️⃣ جلب المنتجات الخاصة بالبائع
+      { $match: { sellerId } },
 
-    const soldData = await Order.aggregate([
+      // 2️⃣ جلب المبيعات من الـ Orders
       {
-        $match: {
-          sellerId: userId,
-          orderStatus: { $in: [orderStatus.completed, orderStatus.pending] }
+        $lookup: {
+          from: "orders",
+          let: { productId: "$_id" },
+          pipeline: [
+            { $unwind: "$products" }, // نفك الـ array
+            {
+              $match: {
+                $expr: { $eq: ["$products.productId", "$$productId"] },
+                orderStatus: { $in: [orderStatus.completed, orderStatus.pending] }
+              }
+            },
+            {
+              $group: {
+                _id: "$products.productId",
+                sold: { $sum: "$products.quantity" }
+              }
+            }
+          ],
+          as: "sales"
         }
       },
-      { $unwind: "$products" },
+
+      // 3️⃣ لو مفيش مبيعات → sold = 0
       {
-        $group: {
-          _id: "$products.productId",
-          sold: { $sum: "$products.quantity" }
+        $addFields: {
+          sold: { $ifNull: [{ $arrayElemAt: ["$sales.sold", 0] }, 0] }
+        }
+      },
+
+      // 4️⃣ مشروع الحقول المطلوبة فقط
+      {
+        $project: {
+          productId: "$_id",
+          title: 1,
+          stock: { $ifNull: ["$stock", 0] },
+          sold: 1,
+          _id: 0
         }
       }
     ]);
 
-    const soldMap = {};
-    soldData.forEach(item => {
-      soldMap[item._id.toString()] = item.sold;
-    });
-
-    const inventory = products.map(p => ({
-      productId: p._id,
-      title: p.title,
-      stock: p.stock || 0,
-      sold: soldMap[p._id.toString()] || 0
-    }));
-
-    return res.status(200).json({
-      message: "Inventory fetched successfully",
-      inventory
-    });
+    res.status(200).json({ inventory });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
-      message: "Internal Server Error",
-      error: error.message
-    });
+    res.status(500).json({ message: "Internal Server Error", error });
   }
 };
