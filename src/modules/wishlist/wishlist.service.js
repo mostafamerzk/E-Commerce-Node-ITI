@@ -10,53 +10,43 @@ export const getwishlist=async(req,res)=>{
 }
 
 export const postwishlist = async (req, res) => {
-  try {
-
-    const { productId } = req.params;
-
-   
-
-    // ✅ check product exists
-    const productExists = await Product.exists({ _id: productId });
-
-
-    
-    if (!productExists) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    // ✅ add without duplicates
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      {
-        $addToSet: { wishlist: productId }
-      },
-      { new: true }
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const alreadyExist = user.wishlist.some(
-      (id) => id.toString() === productId
-    );
-
-    if (alreadyExist) {
-      return res.status(409).json({
-        message: "already exist"
+    try {
+      const { productId } = req.params;
+  
+      const productExists = await Product.exists({ _id: productId });
+      if (!productExists) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+  
+      // ✅ اتحقق الأول قبل الـ update
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      const alreadyExists = user.wishlist.some(
+        (id) => id.toString() === productId
+      );
+  
+      if (alreadyExists) {
+        return res.status(409).json({ message: "already exist" });
+      }
+  
+      // ✅ ضيف بس لو مش موجود
+      user.wishlist.push(productId);
+      await user.save();
+  
+      return res.status(201).json({
+        message: "Product added to wishlist",
+        wishlist: user.wishlist,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: "Server error",
+        error: error.message,
       });
     }
-    return res.status(201).json({
-      message: "Product added to wishlist",
-      wishlist: user.wishlist
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      message: "Server error",
-      error: error.message
-    });
-  }
+  
 };
 
 export const deletewishlist=async(req,res)=>{
