@@ -1,14 +1,21 @@
 import { User } from "../../DB/Models/user.js"
 import { Product } from "../../DB/Models/product.js"
 
-export const getwishlist=async(req,res)=>{
+export const getwishlist = async (req, res) => {
+  const data = await User.findById(req.user._id).populate({
+    path: "wishlist",
+    select: "_id title price mainImage finalPrice discount avgRating"
+  });
 
-    const data=await User.findById(req.user._id).populate({  path: "wishlist",
-        select: "_id title price mainImage"})
-    res.status(200).json(data.wishlist)
+  if (!data) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
-}
-
+  res.status(200).json({
+    message: "Wishlist fetched successfully",
+    wishlist: data.wishlist ?? []
+  });
+};
 export const postwishlist = async (req, res) => {
     try {
       const { productId } = req.params;
