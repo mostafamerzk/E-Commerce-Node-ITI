@@ -95,7 +95,7 @@ export const restrictUser = async (req, res, next) => {
   const { id } = req.params;
   const user = await User.findByIdAndUpdate(
     id,
-    { isDeleted: true },
+    { isDeleted: true, passwordChangeTime: Date.now() },
     { new: true },
   ).lean("-password");
   if (!user) {

@@ -1,6 +1,10 @@
 import { stripe } from "../../utils/stripe/stripe.js";
 import { Order } from "../../DB/Models/order.js";
-import { orderStatus, paymentStatus } from "../../utils/enums/enums.js";
+import {
+  orderStatus,
+  paymentMethods,
+  paymentStatus,
+} from "../../utils/enums/enums.js";
 
 export const createCheckoutSession = async (req, res, next) => {
   const { orderId } = req.body;
@@ -19,6 +23,9 @@ export const createCheckoutSession = async (req, res, next) => {
     order.paymentStatus === paymentStatus.refunded
   ) {
     return next(new Error("Order is already paid or refunded", { cause: 400 }));
+  }
+  if (order.paymentMethod !== paymentMethods.creditCard) {
+    return next(new Error("Order is not paid by credit card", { cause: 400 }));
   }
 
   const session = await stripe.checkout.sessions.create({

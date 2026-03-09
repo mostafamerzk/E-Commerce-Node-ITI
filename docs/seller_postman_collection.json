@@ -1,0 +1,131 @@
+{
+  "info": {
+    "_postman_id": "f5a2d6e7-7b8c-4a1d-9e0f-2a3b4c5d6e7f",
+    "name": "Seller Module",
+    "description": "Collection for Seller Module APIs in the E-Commerce application.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Update or Create Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"storename\": \"Giga Store\",\n    \"storeDescription\": \"Modern electronics and accessories\",\n    \"phone\": \"+201012345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/seller/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["seller", "profile"]
+            },
+            "description": "Create or update the seller's profile details. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/seller/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["seller", "profile"]
+            },
+            "description": "Retrieve the seller's profile details. Requires authentication."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get Seller Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/seller/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["seller", "products"]
+            },
+            "description": "Retrieve all products associated with the seller. Requires authentication."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "Get Seller Inventory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/seller/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["seller", "inventory"]
+            },
+            "description": "Retrieve the inventory of for the seller. Requires authentication."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://e-commerce-node-iti.vercel.app",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

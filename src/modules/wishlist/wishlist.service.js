@@ -18,7 +18,6 @@ export const postwishlist = async (req, res) => {
         return res.status(404).json({ message: "Product not found" });
       }
   
-      // ✅ اتحقق الأول قبل الـ update
       const user = await User.findById(req.user._id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -32,7 +31,6 @@ export const postwishlist = async (req, res) => {
         return res.status(409).json({ message: "already exist" });
       }
   
-      // ✅ ضيف بس لو مش موجود
       user.wishlist.push(productId);
       await user.save();
   
