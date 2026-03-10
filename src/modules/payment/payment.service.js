@@ -33,6 +33,7 @@ export const createCheckoutSession = async (req, res, next) => {
     mode: "payment",
     customer_email: req.user.email,
     metadata: { orderId: orderId.toString() },
+    expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes from now
     cancel_url: process.env.CANCEL_URL || "http://localhost:3000/cancel",
     success_url: process.env.SUCCESS_URL || "http://localhost:3000/success",
     line_items: order.products.map((product) => {
@@ -74,19 +75,45 @@ export const handleWebhook = async (req, res, next) => {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
+    const orderId = session.metadata.orderId;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      console.error(`Order not found: ${orderId}`);
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.paymentStatus === paymentStatus.paid) {
+      return res.status(200).json({ received: true });
+    }
+
+    // Deduct stock
+    for (const item of order.products) {
+      await Product.findByIdAndUpdate(item.productId, {
+        $inc: { stock: -item.quantity },
+      });
+    }
+
+    order.paymentStatus = paymentStatus.paid;
+    order.orderStatus = orderStatus.confirmed;
+    order.paidAt = new Date();
+    await order.save();
+
+    console.log(`Order ${order._id} paid and stock deducted successfully`);
+  }
+
+  if (event.type === "checkout.session.expired") {
+    const session = event.data.object;
+    const orderId = session.metadata.orderId;
+
     const order = await Order.findOneAndUpdate(
-      { stripeSessionId: session.id },
-      {
-        paymentStatus: paymentStatus.paid,
-        orderStatus: orderStatus.confirmed,
-      },
+      { _id: orderId, orderStatus: orderStatus.pending },
+      { orderStatus: orderStatus.cancelled },
       { new: true },
     );
 
-    if (!order) {
-      console.error(`Order not found for session ${session.id}`);
-    } else {
-      console.log(`Order ${order._id} paid successfully`);
+    if (order) {
+      console.log(`Order ${orderId} cancelled due to session expiration`);
     }
   }
 

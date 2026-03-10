@@ -89,6 +89,9 @@ const orderSchema = new mongoose.Schema(
     stripeSessionId: {
       type: String,
     },
+    paidAt: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );

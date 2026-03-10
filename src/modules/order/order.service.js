@@ -108,13 +108,6 @@ export const placeOrder = async (req, res, next) => {
     orderStatus: orderStatus.pending,
   });
 
-  // Deduct stock using orderProducts (not cart.products) for consistency
-  for (const item of orderProducts) {
-    await Product.findByIdAndUpdate(item.productId, {
-      $inc: { stock: -item.quantity },
-    });
-  }
-
   // Clear cart
   await Cart.findOneAndUpdate({ userId: req.user._id }, { products: [] });
 
@@ -177,13 +170,6 @@ export const cancelOrder = async (req, res, next) => {
 
   order.orderStatus = orderStatus.cancelled;
   await order.save();
-
-  // Restore stock
-  for (const item of order.products) {
-    await Product.findByIdAndUpdate(item.productId, {
-      $inc: { stock: item.quantity },
-    });
-  }
 
   // Send cancellation email
   orderEvent.emit(
