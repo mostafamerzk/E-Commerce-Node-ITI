@@ -1,5 +1,7 @@
 import { stripe } from "../../utils/stripe/stripe.js";
 import { Order } from "../../DB/Models/order.js";
+import { Product } from "../../DB/Models/product.js";
+import { orderEvent } from "../../utils/email/email.event.js";
 import {
   orderStatus,
   paymentMethods,
@@ -103,6 +105,35 @@ export const handleWebhook = async (req, res, next) => {
     order.paidAt = new Date();
     await order.save();
 
+    // Fetch receipt URL from Stripe
+    let receiptUrl = "";
+    try {
+      if (session.payment_intent) {
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          session.payment_intent,
+        );
+        if (paymentIntent.latest_charge) {
+          const charge = await stripe.charges.retrieve(
+            paymentIntent.latest_charge,
+          );
+          receiptUrl = charge.receipt_url;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching Stripe receipt:", error);
+    }
+
+    // Send payment success email
+    const populatedOrder = await Order.findById(orderId).populate("userId");
+    if (populatedOrder && populatedOrder.userId) {
+      orderEvent.emit(
+        "paymentSuccess",
+        populatedOrder.userId.email,
+        populatedOrder,
+        receiptUrl,
+      );
+    }
+
     console.log(`Order ${order._id} paid and stock deducted successfully`);
   }
 
@@ -114,9 +145,16 @@ export const handleWebhook = async (req, res, next) => {
       { _id: orderId, orderStatus: orderStatus.pending },
       { orderStatus: orderStatus.cancelled },
       { new: true },
-    );
+    ).populate("userId");
 
-    if (order) {
+    if (order && order.userId) {
+      // Send cancellation email
+      orderEvent.emit(
+        "orderStatusUpdate",
+        order.userId.email,
+        order,
+        orderStatus.cancelled,
+      );
       console.log(`Order ${orderId} cancelled due to session expiration`);
     }
   }
