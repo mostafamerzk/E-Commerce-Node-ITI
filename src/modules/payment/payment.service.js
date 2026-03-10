@@ -34,8 +34,12 @@ export const createCheckoutSession = async (req, res, next) => {
     customer_email: req.user.email,
     metadata: { orderId: orderId.toString() },
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes from now
-    cancel_url: process.env.CANCEL_URL || "http://localhost:3000/cancel",
-    success_url: process.env.SUCCESS_URL || "http://localhost:3000/success",
+    cancel_url:
+      process.env.CANCEL_URL ||
+      "https://e-commrece-client-five.vercel.app/payment/cancel",
+    success_url:
+      process.env.SUCCESS_URL ||
+      "https://e-commrece-client-five.vercel.app/payment/success",
     line_items: order.products.map((product) => {
       return {
         price_data: {
