@@ -4,6 +4,7 @@ import {
   orderStatus,
   paymentMethods,
   paymentStatus,
+  roles,
 } from "../../utils/enums/enums.js";
 
 export const getAllUsersSchema = Joi.object({
