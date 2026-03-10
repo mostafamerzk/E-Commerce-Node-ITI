@@ -175,7 +175,7 @@ export const cancelOrder = async (req, res, next) => {
   orderEvent.emit(
     "orderStatusUpdate",
     req.user.email,
-    order.orderNumber,
+    order,
     orderStatus.cancelled,
   );
 
