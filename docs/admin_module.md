@@ -1,183 +1,142 @@
 # Admin Module Documentation
 
-The Admin Module provides essential administrative functionalities to manage users, products, orders, and promotional banners. This module is restricted to users with the `admin` role.
+The Admin Module provides essential administrative functionalities to manage users, sellers, products, categories, orders, coupons, reviews, and promotional banners.
 
 ---
 
 ## **Overview**
 
-- **Base URL**: `/admin`
+- **Base URL**: `/admin` (Most endpoints), `/categories`, `/reviews`, `/products`
 - **Authentication**: Required (`Bearer Token`)
-- **Authorization**: `Admin` role only
+- **Authorization**: `Admin` role required (some endpoints also allow `Seller`)
 
 ---
 
-## **1. User Management**
+## **1. Analytics & Dashboard**
 
-### **Get All Users**
+### **Get Analytics**
 
-Retrieves a paginated list of all users.
+Retrieves aggregated data for the admin dashboard.
 
-- **Endpoint**: `GET /admin/users`
-- **Query Params**:
-  - `page` (number, optional, min: 1): Page number.
-  - `limit` (number, optional, default: 10, max: 30): Items per page.
+- **Endpoint**: `GET /admin/analytics`
 - **Success Response**: `200 OK`
   ```json
   {
-    "message": "all users",
+    "message": "Analytics fetched successfully",
     "data": {
-      "docs": [...],
-      "total": 50,
-      "pages": 5,
-      "page": 1
+      "counts": { "totalUsers": 100, "totalSellers": 20, "totalProducts": 50, "totalOrders": 200 },
+      "revenue": { "totalRevenue": [...], "byDay": [...], "byMonth": [...] },
+      "topProducts": [...],
+      "lowStock": [...],
+      "ordersByStatus": [...]
     }
   }
   ```
 
-### **Get User By ID**
+---
 
-Retrieves detailed information about a specific user.
+## **2. User Management**
 
-- **Endpoint**: `GET /admin/users/:id`
-- **Path Params**:
-  - `id` (string): MongoDB User ObjectId.
-- **Success Response**: `200 OK`
-  ```json
-  {
-    "message": "user found",
-    "data": { ... }
-  }
-  ```
+### **Get All Users**
 
-### **Restrict User (Soft Delete)**
+- **Endpoint**: `GET /admin/users`
+- **Query Params**: `page`, `limit`, `search` (userName/email), `role`, `isBlocked`
+- **Success Response**: `200 OK` (Standardized pagination + `docs` key)
 
-Disables a user's account by setting `isDeleted: true`.
+### **Update User Role**
 
-- **Endpoint**: `PATCH /admin/users/:id/restrict`
-- **Path Params**:
-  - `id` (string): MongoDB User ObjectId.
-- **Success Response**: `200 OK`
-  ```json
-  {
-    "message": "user restricted",
-    "data": { ... }
-  }
-  ```
+- **Endpoint**: `PATCH /admin/users/:id/role`
+- **Body**: `{ "role": "seller" | "admin" | "user" }`
 
-### **Approve User (Restore Account)**
+### **Restrict/Approve User**
 
-Re-enables a restricted user's account.
-
-- **Endpoint**: `PATCH /admin/users/:id/approve`
-- **Path Params**:
-  - `id` (string): MongoDB User ObjectId.
-- **Success Response**: `200 OK`
-  ```json
-  {
-    "message": "user approved",
-    "data": { ... }
-  }
-  ```
+- `PATCH /admin/users/:id/restrict`: Sets `isDeleted: true`.
+- `PATCH /admin/users/:id/approve`: Sets `isDeleted: false`.
 
 ---
 
-## **2. Product Management**
+## **3. Seller Management**
 
-### **Get All Products**
+### **List Sellers**
 
-Retrieves a paginated and filtered list of all products.
+- **Endpoint**: `GET /admin/sellers`
+- **Query Params**: `page`, `limit`, `search`, `isBlocked`
 
-- **Endpoint**: `GET /admin/products`
-- **Query Params**:
-  - `page`, `limit` (number, optional)
-  - `sort` (string, optional): `newest`, `oldest`, `priceHigh`, `priceLow`, `rating`.
-  - `minPrice`, `maxPrice` (number, optional)
-  - `rating` (number, optional): 1-5.
-  - `search` (string, optional): Search by product name.
-- **Success Response**: `200 OK`
-  ```json
-  {
-    "message": "Products fetched successfully",
-    "products": { ... }
-  }
-  ```
+### **Get Seller Details**
 
-### **Delete Product (Soft Delete)**
+- **Endpoint**: `GET /admin/sellers/:id`
+- **Returns**: Seller profile + their products.
 
-Marks a product as deleted.
+### **Approve/Restrict Seller**
 
-- **Endpoint**: `DELETE /admin/products/:id`
-- **Success Response**: `200 OK`
-  ```json
-  {
-    "success": true,
-    "message": "product deleted",
-    "data": { ... }
-  }
-  ```
+- `PATCH /admin/sellers/:id/approve`: Sets `isBlocked: false`.
+- `PATCH /admin/sellers/:id/restrict`: Sets `isBlocked: true`.
 
 ---
 
-## **3. Order Management**
+## **4. Product & Category Management**
 
-### **Get All Orders**
+### **Product Operations**
 
-Retrieves a list of all orders with advanced filtering options.
+- `GET /admin/products`: Advanced filtering (category, search, price, stock).
+- `POST /products`: Create product (Admin/Seller).
+- `PATCH /products/:id`: Update product (Admin/Seller).
+- `DELETE /products/:id`: Delete product (Admin/Seller).
+- `PATCH /admin/products/:id/recover`: Restore deleted product.
+
+### **Category Operations**
+
+- `GET /categories`: List all.
+- `POST /categories`: Create category (Admin only).
+- `PATCH /categories/:id`: Update category (Admin only).
+- `DELETE /categories/:id`: Delete category (Admin only).
+
+---
+
+## **5. Order Management**
+
+### **List Orders**
 
 - **Endpoint**: `GET /admin/orders`
-- **Query Params**:
-  - `page`, `limit`, `sort` (optional)
-  - `orderStatus` (string, optional): `pending`, `confirmed`, `shipped`, etc.
-  - `userId` (string, optional)
-  - `paymentStatus` (string, optional)
-- **Success Response**: `200 OK`
-  ```json
-  {
-    "message": "Orders fetched successfully",
-    "orders": { ... }
-  }
-  ```
+- **Query Params**: `orderStatus`, `paymentStatus`, `userId`, `minTotal`, `maxTotal`, `startDate`, `endDate`.
 
 ### **Update Order Status**
 
-Updates the status of an order. Only valid state transitions are allowed.
-
 - **Endpoint**: `PATCH /admin/orders/:id/status`
-- **Request Body**:
-  ```json
-  {
-    "orderStatus": "shipped"
-  }
-  ```
-- **Valid Transitions**:
-  - `pending` -> `confirmed`, `cancelled`
-  - `confirmed` -> `processing`, `cancelled`
-  - `processing` -> `shipped`, `cancelled`
-  - `shipped` -> `delivered`, `returned`
-- **Success Response**: `200 OK`
+- **Body**: `{ "orderStatus": "shipped" }`
 
 ---
 
-## **4. Banner Management**
+## **6. Coupon Management**
 
-### **Create Banner**
+### **CRUD Operations**
 
-Creates a new promotional banner with an image.
+- `POST /admin/coupons`: Create new coupon.
+- `GET /admin/coupons`: List all coupons.
+- `GET /admin/coupons/:id`: Get single coupon.
+- `PATCH /admin/coupons/:id`: Update coupon.
+- `DELETE /admin/coupons/:id`: Deactivate coupon (soft delete).
 
-- **Endpoint**: `POST /admin/banners`
-- **Content-Type**: `multipart/form-data`
-- **Request Body**:
-  - `title` (string, required)
-  - `link` (string, required)
-  - `image` (file, required)
-- **Success Response**: `201 Created`
+---
 
-### **Update Banner**
+## **7. Reviews Moderation**
 
-Updates an existing banner (title, link, active status, or image).
+### **List Reviews**
 
-- **Endpoint**: `PATCH /admin/banners/:id`
-- **Request Body**: (all fields optional)
-  - `title`, `link`, `isActive`, `image`
-- **Success Response**: `200 OK`
+- **Endpoint**: `GET /admin/reviews`
+- **Query Params**: `productId`, `userId`, `rating`.
+
+### **Delete Review**
+
+- **Endpoint**: `DELETE /reviews/:reviewId`
+- **Authorization**: Admin, Seller (of the product), or the User who wrote it.
+
+---
+
+## **8. Banner Management**
+
+- `GET /admin/banners`: List all.
+- `POST /admin/banners`: Create banner.
+- `PATCH /admin/banners/:id`: Update banner.
+- `DELETE /admin/banners/:id`: Deactivate banner.
+- `PATCH /admin/banners/:id/activate`: Re-activate banner.

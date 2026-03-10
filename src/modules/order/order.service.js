@@ -1,6 +1,7 @@
 import { Order } from "../../DB/Models/order.js";
 import { Cart } from "../../DB/Models/cart.js";
 import { Product } from "../../DB/Models/product.js";
+import { Coupon } from "../../DB/Models/coupon.js";
 import { nanoid } from "nanoid";
 import {
   orderStatus,
@@ -38,7 +39,24 @@ export const getCheckoutSummary = async (req, res, next) => {
   }
 
   const shipping = 50;
-  const discount = 0;
+  let discount = 0;
+  let coupon = null;
+
+  if (req.query.couponCode) {
+    coupon = await Coupon.findOne({
+      code: req.query.couponCode.toUpperCase(),
+      isActive: true,
+      expiresAt: { $gt: new Date() },
+    });
+    if (coupon && subtotal >= (coupon.minOrderAmount || 0)) {
+      if (coupon.discountType === "percentage") {
+        discount = (subtotal * coupon.discountValue) / 100;
+      } else {
+        discount = coupon.discountValue;
+      }
+    }
+  }
+
   const total = subtotal + shipping - discount;
 
   return res.status(200).json({
@@ -46,6 +64,7 @@ export const getCheckoutSummary = async (req, res, next) => {
     shipping,
     discount,
     total,
+    couponCode: coupon?.code,
   });
 };
 
@@ -94,7 +113,40 @@ export const placeOrder = async (req, res, next) => {
     0,
   );
   const shipping = 50;
-  const discount = 0;
+  let discount = 0;
+  let coupon = null;
+
+  if (couponCode) {
+    coupon = await Coupon.findOne({
+      code: couponCode.toUpperCase(),
+      isActive: true,
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!coupon) {
+      return next(new Error("Invalid or expired coupon", { cause: 400 }));
+    }
+
+    if (subtotal < (coupon.minOrderAmount || 0)) {
+      return next(
+        new Error(
+          `Order total must be at least ${coupon.minOrderAmount} to use this coupon`,
+          { cause: 400 },
+        ),
+      );
+    }
+
+    if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+      return next(new Error("Coupon usage limit reached", { cause: 400 }));
+    }
+
+    if (coupon.discountType === "percentage") {
+      discount = (subtotal * coupon.discountValue) / 100;
+    } else {
+      discount = coupon.discountValue;
+    }
+  }
+
   const total = subtotal + shipping - discount;
 
   const order = await Order.create({
@@ -106,7 +158,14 @@ export const placeOrder = async (req, res, next) => {
     orderNumber: `ORD-${nanoid(10).toUpperCase()}`,
     paymentStatus: paymentStatus.unpaid,
     orderStatus: orderStatus.pending,
+    couponId: coupon?._id,
+    discountAmount: discount,
   });
+
+  if (coupon) {
+    coupon.usedCount += 1;
+    await coupon.save();
+  }
 
   // Clear cart
   await Cart.findOneAndUpdate({ userId: req.user._id }, { products: [] });

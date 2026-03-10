@@ -92,6 +92,15 @@ const orderSchema = new mongoose.Schema(
     paidAt: {
       type: Date,
     },
+    couponId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Coupons",
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true },
 );
