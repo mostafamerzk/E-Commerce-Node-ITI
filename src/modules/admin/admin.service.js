@@ -50,7 +50,10 @@ export const getAllUsers = async (req, res, next) => {
     ];
   }
   if (role) filter.role = role;
-  if (isBlocked !== undefined) filter.isBlocked = isBlocked === "true";
+  if (isBlocked !== undefined) {
+    const statusField = role === "seller" ? "isBlocked" : "isDeleted";
+    filter[statusField] = isBlocked === "true" ? true : { $ne: true };
+  }
 
   const users = await User.paginate(filter, options);
 
