@@ -6,7 +6,7 @@
 
 - **Endpoint**: `GET /users`
 - **Auth**: Admin
-- **Query Params**: `search`, `page`, `limit`
+- **Query Params**: `search`, `page`, `limit`, `role`, `isBlocked`
 - **Success Response (200 OK)**:
   ```json
   {
@@ -23,7 +23,7 @@
   ```json
   {
     "message": "user found",
-    "data": { _id: "...", userName: "...", email: "..." }
+    "data": { "_id": "...", "userName": "...", "email": "..." }
   }
   ```
 - **Error Response (404)**: `{ "message": "user not found" }`
@@ -52,6 +52,23 @@
   }
   ```
 
+## 4.5. Update User Role
+
+- **Endpoint**: `PATCH /users/:userId/role`
+- **Auth**: Admin
+- **Request Body**:
+  ```json
+  {
+    "role": "seller" // or "user", "admin"
+  }
+  ```
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "User role updated successfully"
+  }
+  ```
+
 ## 5. Get All Products
 
 - **Endpoint**: `GET /products`
@@ -73,7 +90,7 @@
   ```json
   {
     "message": "product found",
-    "data": { _id: "...", name: "...", price: 100 }
+    "data": { "_id": "...", "name": "...", "price": 100 }
   }
   ```
 - **Error Response (404)**: `{ "message": "product not found" }`
@@ -104,7 +121,7 @@
 
 - **Endpoint**: `GET /orders`
 - **Auth**: Admin
-- **Query Params**: `page`, `limit`, `sort`, `status`, `paymentStatus`, `shippingStatus`, `minTotal`, `maxTotal`, `startDate`, `endDate`
+- **Query Params**: `page`, `limit`, `sort`, `orderStatus`, `paymentStatus`, `shippingStatus`, `minTotal`, `maxTotal`, `startDate`, `endDate`, `userId`, `paymentMethod`
 - **Success Response (200 OK)**:
   ```json
   {
@@ -121,7 +138,7 @@
   ```json
   {
     "message": "order found",
-    "data": { _id: "...", status: "pending", totalAmount: 500 }
+    "data": { "_id": "...", "status": "pending", "totalAmount": 500 }
   }
   ```
 - **Error Response (404)**: `{ "message": "order not found" }`
@@ -144,7 +161,6 @@
     "order": { ... }
   }
   ```
-- **Error Response (400)**: `{ "message": "Invalid order status" }`
 
 ## 12. Get All Banners
 
@@ -175,10 +191,9 @@
   ```json
   {
     "message": "Banner created successfully",
-    "banner": { _id: "...", title: "Summer Sale", isActive: true }
+    "banner": { "_id": "...", "title": "Summer Sale", "isActive": true }
   }
   ```
-- **Error Response (400)**: `{ "message": "Title, link, and image are required" }`
 
 ## 14. Get Banner by ID
 
@@ -188,10 +203,9 @@
   ```json
   {
     "message": "Banner found",
-    "banner": { _id: "...", title: "Summer Sale" }
+    "banner": { "_id": "...", "title": "Summer Sale" }
   }
   ```
-- **Error Response (404)**: `{ "message": "Banner not found" }`
 
 ## 15. Update Banner
 
@@ -214,14 +228,14 @@
   }
   ```
 
-## 16. Delete Banner
+## 16. Delete (Deactivate) Banner
 
 - **Endpoint**: `DELETE /banners/:bannerId`
 - **Auth**: Admin
 - **Success Response (200 OK)**:
   ```json
   {
-    "message": "Banner deleted successfully"
+    "message": "Banner deactivated successfully"
   }
   ```
 
@@ -233,5 +247,121 @@
   ```json
   {
     "message": "Banner activated successfully"
+  }
+  ```
+
+## 18. Get Analytics
+
+- **Endpoint**: `GET /analytics`
+- **Auth**: Admin
+- **Query Params**: `startDate`, `endDate` (ISO dates)
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Analytics fetched successfully",
+    "data": { ... }
+  }
+  ```
+
+## 19. Get All Sellers
+
+- **Endpoint**: `GET /sellers`
+- **Auth**: Admin
+- **Query Params**: Same as Get All Users
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Sellers fetched successfully",
+    "sellers": [ ... ]
+  }
+  ```
+
+## 20. Get Seller by ID
+
+- **Endpoint**: `GET /sellers/:sellerId`
+- **Auth**: Admin
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Seller found",
+    "data": { ... }
+  }
+  ```
+
+## 21. Approve Seller
+
+- **Endpoint**: `PATCH /sellers/:sellerId/approve`
+- **Auth**: Admin
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Seller approved successfully"
+  }
+  ```
+
+## 22. Restrict Seller
+
+- **Endpoint**: `PATCH /sellers/:sellerId/restrict`
+- **Auth**: Admin
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Seller restricted successfully"
+  }
+  ```
+
+## 23. Coupon Management
+
+### Create Coupon
+
+- **Endpoint**: `POST /coupons`
+- **Auth**: Admin
+- **Request Body**:
+  ```json
+  {
+    "code": "SUMMER50",
+    "discountType": "percentage",
+    "discountValue": 50,
+    "expiresAt": "2024-12-31"
+  }
+  ```
+
+### Get All Coupons
+
+- **Endpoint**: `GET /coupons`
+- **Auth**: Admin
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Coupons fetched successfully",
+    "coupons": [ ... ]
+  }
+  ```
+
+### Get Coupon Details
+
+- **Endpoint**: `GET /coupons/:id`
+- **Auth**: Admin
+
+### Update Coupon
+
+- **Endpoint**: `PATCH /coupons/:id`
+- **Auth**: Admin
+
+### Delete Coupon
+
+- **Endpoint**: `DELETE /coupons/:id`
+- **Auth**: Admin
+
+## 24. Review Moderation
+
+- **Endpoint**: `GET /reviews`
+- **Auth**: Admin
+- **Query Params**: `page`, `limit`, `productId`, `userId`, `rating`
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "Reviews fetched successfully",
+    "reviews": [ ... ]
   }
   ```

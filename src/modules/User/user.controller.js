@@ -20,7 +20,7 @@ userRouter
   .route("/profile/update")
   .patch(
     asyncHandler(isAuthenticated),
-    isAuthorized(roles.user),
+    isAuthorized(roles.user, roles.admin),
     validation(userSchema.updateUser),
     asyncHandler(userService.updateProfile),
   );

@@ -244,9 +244,29 @@ This document outlines all admin-level APIs in the E-Commerce system, including 
 
 **Base URL**: `/review`
 
+- **POST `/review/:productId`**
+  - **Description**: Add a review to a product.
+  - **Auth**: `User` | `Seller` | `Admin`
+  - **Validation (Body)**:
+    - `rating`: Number (1-5, **Required**)
+    - `comment`: String (**Required**)
+
+- **GET `/review/:productId`**
+  - **Description**: Get all reviews for a product.
+  - **Auth**: Public
+  - **Validation (Query)**:
+    - `page`, `limit`, `sort` (Optional)
+
+- **PATCH `/review/:reviewId`**
+  - **Description**: Update your own review.
+  - **Auth**: `User` | `Seller` | `Admin` (Author only)
+  - **Validation (Body)**:
+    - `rating`: Number (Optional)
+    - `comment`: String (Optional)
+
 - **DELETE `/review/:reviewId`**
   - **Description**: Delete/Moderate a review.
-  - **Auth**: `Admin` | `Seller` (of product) | `User` (author)
+  - **Auth**: `Admin` | `User` (Author)
   - **Validation (Params)**:
     - `reviewId`: ObjectId (**Required**)
 
