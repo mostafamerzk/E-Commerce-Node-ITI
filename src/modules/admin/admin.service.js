@@ -117,33 +117,36 @@ export const getUserById = async (req, res, next) => {
  */
 export const restrictUser = async (req, res, next) => {
   const { id } = req.params;
-  const user = await User.findByIdAndUpdate(
-    id,
-    { isDeleted: true, passwordChangeTime: Date.now() },
-    { new: true },
-  ).lean("-password");
+  const user = await User.findById(id);
   if (!user) {
     return next(new Error("user not found", { cause: 404 }));
   }
+
+  const statusField = user.role === "seller" ? "isBlocked" : "isDeleted";
+  user[statusField] = true;
+  user.passwordChangeTime = Date.now();
+  await user.save();
+
   return res.status(200).json({ message: "user restricted", data: user });
 };
 
 /**
- * Approve/un-restrict a user by setting isDeleted flag to false
+ * Approve/un-restrict a user
  * This restores access to the user's account if they were previously restricted
  * @route PATCH /admin/users/:userId/approve
  */
 
 export const approveUser = async (req, res, next) => {
   const { id } = req.params;
-  const user = await User.findByIdAndUpdate(
-    id,
-    { isDeleted: false },
-    { new: true },
-  );
+  const user = await User.findById(id);
   if (!user) {
     return next(new Error("user not found", { cause: 404 }));
   }
+
+  const statusField = user.role === "seller" ? "isBlocked" : "isDeleted";
+  user[statusField] = false;
+  await user.save();
+
   return res.status(200).json({ message: "user approved", data: user });
 };
 
@@ -785,5 +788,70 @@ export const getAllReviews = async (req, res, next) => {
     pages: reviews.totalPages,
     page: reviews.page,
     docs: reviews.docs,
+  });
+};
+
+export const updateUser = async (req, res, next) => {
+  const { id } = req.params;
+  const { userName, phone, role, addresses } = req.body;
+
+  const user = await User.findById(id);
+  if (!user) {
+    return next(new Error("user not found", { cause: 404 }));
+  }
+
+  if (id === req.user._id.toString() && role && role !== user.role) {
+    return next(new Error("You cannot change your own role", { cause: 400 }));
+  }
+
+  if (userName) user.userName = userName;
+  if (phone) user.phone = phone;
+  if (role) user.role = role;
+  if (addresses) {
+    // Map phone from payload to country if needed, or just pass as is if schema allows
+    // Based on schema analysis, address has street, city, country, postalCode
+    // We'll keep street, city, postalCode and ignore phone or use it as country if appropriate
+    user.address = addresses.map((addr) => ({
+      street: addr.street,
+      city: addr.city,
+      country: addr.country || "", // Provide empty string if missing
+      postalCode: addr.postalCode,
+    }));
+  }
+
+  await user.save();
+
+  return res.status(200).json({
+    message: "user updated successfully",
+    data: user,
+  });
+};
+
+export const updateUserImage = async (req, res, next) => {
+  const { id } = req.params;
+  const user = await User.findById(id);
+  if (!user) {
+    return next(new Error("user not found", { cause: 404 }));
+  }
+
+  if (!req.file) {
+    return next(new Error("image is required", { cause: 400 }));
+  }
+
+  const folderPath = `${process.env.CLOUD_NAME}/user/${id}/profile`;
+  const { secure_url, public_id } = await cloud.uploader.upload(req.file.path, {
+    folder: folderPath,
+  });
+
+  if (user.profilePicture && user.profilePicture.public_id) {
+    await cloud.uploader.destroy(user.profilePicture.public_id);
+  }
+
+  user.profilePicture = { secure_url, public_id };
+  await user.save();
+
+  return res.status(200).json({
+    message: "user image updated successfully",
+    data: user,
   });
 };

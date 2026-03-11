@@ -28,7 +28,22 @@ adminRoutes
     asyncHandler(isAuthenticated),
     isAuthorized(roles.admin),
     asyncHandler(adminService.getUserById),
+  )
+  .patch(
+    validation(adminValidation.updateUserSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.updateUser),
   );
+
+adminRoutes.patch(
+  "/users/:id/image",
+  asyncHandler(isAuthenticated),
+  isAuthorized(roles.admin),
+  uploadCloud(fileValidations.Image).single("image"),
+  validation(adminValidation.updateUserImageSchema),
+  asyncHandler(adminService.updateUserImage),
+);
 //3
 adminRoutes
   .route("/users/:id/restrict")

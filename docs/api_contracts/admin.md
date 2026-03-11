@@ -69,6 +69,50 @@
   }
   ```
 
+## 4.6. Update Profile (Admin/Self)
+
+- **Endpoint**: `PATCH /user/profile/update`
+- **Auth**: Admin | User
+- **Request Body**: All optional
+  ```json
+  {
+    "userName": "...",
+    "phone": "...",
+    "addressId": "...",
+    "address": {
+      "street": "...",
+      "city": "...",
+      "country": "...",
+      "postalCode": "..."
+    }
+  }
+  ```
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "updated successfully"
+  }
+  ```
+
+## 4.7. Update Profile Image (Admin/Self)
+
+- **Endpoint**: `POST /user/profile/image`
+- **Auth**: Admin | User
+- **Request Body**: `multipart/form-data`
+  ```json
+  {
+    "image": "(File)"
+  }
+  ```
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "message": "success",
+    "file": { ... }
+  }
+  ```
+
 ## 5. Get All Products
 
 - **Endpoint**: `GET /products`

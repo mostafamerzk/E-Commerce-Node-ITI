@@ -117,3 +117,27 @@ export const getAnalyticsSchema = Joi.object({
   startDate: Joi.date().iso().optional(),
   endDate: Joi.date().iso().greater(Joi.ref("startDate")).optional(),
 });
+
+export const updateUserSchema = Joi.object({
+  id: Joi.string().custom(isValidObjectId).required(),
+  userName: Joi.string().min(2).max(100).optional(),
+  phone: Joi.string().optional(),
+  role: Joi.string()
+    .valid(...Object.values(roles))
+    .optional(),
+  addresses: Joi.array()
+    .items(
+      Joi.object({
+        street: Joi.string().required(),
+        city: Joi.string().required(),
+        phone: Joi.string().required(),
+        postalCode: Joi.string().required(),
+      }),
+    )
+    .optional(),
+}).min(2); // id + at least one field
+
+export const updateUserImageSchema = Joi.object({
+  id: Joi.string().custom(isValidObjectId).required(),
+  file: Joi.any().required(),
+});

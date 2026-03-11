@@ -280,6 +280,19 @@ This document outlines all admin-level APIs in the E-Commerce system, including 
   - **Description**: Get own profile (Admin role).
   - **Auth**: `Admin` | `User`
 
+- **PATCH `/user/profile/update`**
+  - **Description**: Update profile details (username, phone, addresses).
+  - **Auth**: `Admin` | `User`
+  - **Validation (Body)**:
+    - `userName`, `phone`, `address`, `addressId` (Optional)
+    - See logic for managing addresses (Add/Update/Delete).
+
+- **POST `/user/profile/image`**
+  - **Description**: Upload/Update profile picture.
+  - **Auth**: `Admin` | `User`
+  - **Validation (Form-Data)**:
+    - `image`: File (**Required**)
+
 - **DELETE `/user/profile/freeze`**
   - **Description**: Freeze account.
   - **Auth**: `Admin` | `User`
