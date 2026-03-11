@@ -31,10 +31,22 @@ export const createCategory = asyncHandler(async (req, res, next) => {
 });
 
 export const getCategories = asyncHandler(async (req, res, next) => {
-  const categories = await Category.find().lean();
+  const { page = 1, limit = 100 } = req.query; // Default limit 100 to backward compatibility if needed, though typically it should be small.
+  const options = {
+    page: parseInt(page),
+    limit: parseInt(limit),
+    lean: true,
+  };
+
+  const categories = await Category.paginate({}, options);
+
   return res.status(200).json({
     message: "Categories fetched successfully",
-    categories,
+    categories: categories.docs,
+    total: categories.totalDocs,
+    pages: categories.totalPages,
+    page: categories.page,
+    docs: categories.docs,
   });
 });
 

@@ -1,7 +1,8 @@
 import { EventEmitter } from "events";
 import sendEmail, { Subjects } from "./sendEmail.js";
-import { html } from "./generateHTML.js";
+import { html, paymentReceiptHTML, cancellationHTML } from "./generateHTML.js";
 import { generateToken } from "../token/token.js";
+import { orderStatus } from "../enums/enums.js";
 
 export const activateAcc = new EventEmitter();
 
@@ -27,10 +28,26 @@ orderEvent.on("orderConfirmation", async (email, orderNumber, total) => {
   await sendEmail(email, subject, content);
 });
 
-orderEvent.on("orderStatusUpdate", async (email, orderNumber, status) => {
-  const subject = "Order Status Update";
+orderEvent.on("paymentSuccess", async (email, order, receiptUrl) => {
+  const subject = `Payment Receipt for Order #${order.orderNumber}`;
   const content = {
-    html: `<h1>Order Update</h1><p>Your order ${orderNumber} status has been updated to: <b>${status}</b></p>`,
+    html: paymentReceiptHTML(order, receiptUrl),
   };
+  await sendEmail(email, subject, content);
+});
+
+orderEvent.on("orderStatusUpdate", async (email, order, status) => {
+  const subject = `Order Status Update: ${status}`;
+  let content;
+
+  if (status === orderStatus.cancelled) {
+    content = {
+      html: cancellationHTML(order),
+    };
+  } else {
+    content = {
+      html: `<h1>Order Update</h1><p>Your order ${order.orderNumber} status has been updated to: <b>${status}</b></p>`,
+    };
+  }
   await sendEmail(email, subject, content);
 });
