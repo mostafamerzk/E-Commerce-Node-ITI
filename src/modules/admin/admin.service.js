@@ -793,7 +793,8 @@ export const getAllReviews = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
   const { id } = req.params;
-  const { userName, phone, role, addresses } = req.body;
+  const { userName, phone, role, addresses, storename, storeDescription } =
+    req.body;
 
   const user = await User.findById(id);
   if (!user) {
@@ -807,6 +808,8 @@ export const updateUser = async (req, res, next) => {
   if (userName) user.userName = userName;
   if (phone) user.phone = phone;
   if (role) user.role = role;
+  if (storename) user.storename = storename;
+  if (storeDescription) user.storeDescription = storeDescription;
   if (addresses) {
     // Map phone from payload to country if needed, or just pass as is if schema allows
     // Based on schema analysis, address has street, city, country, postalCode

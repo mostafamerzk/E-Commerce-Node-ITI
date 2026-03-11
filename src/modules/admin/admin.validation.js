@@ -130,11 +130,13 @@ export const updateUserSchema = Joi.object({
       Joi.object({
         street: Joi.string().required(),
         city: Joi.string().required(),
-        phone: Joi.string().required(),
+        country: Joi.string().optional(),
         postalCode: Joi.string().required(),
       }),
     )
     .optional(),
+  storename: Joi.string().optional(),
+  storeDescription: Joi.string().optional(),
 }).min(2); // id + at least one field
 
 export const updateUserImageSchema = Joi.object({
