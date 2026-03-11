@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 const categorySchema = new mongoose.Schema(
   {
@@ -40,5 +41,7 @@ categorySchema.pre("save", function (next) {
   }
   next();
 });
+
+categorySchema.plugin(mongoosePaginate);
 
 export const Category = mongoose.model("Categories", categorySchema);
