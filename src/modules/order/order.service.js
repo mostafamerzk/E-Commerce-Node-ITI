@@ -19,14 +19,22 @@ export const getCheckoutSummary = async (req, res, next) => {
   // Recalculate subtotal from actual product prices (finalPrice) for accuracy
   let subtotal = 0;
   for (const item of cart.products) {
-    console.log(item);
     const product = await Product.findById(item.productId);
-    console.log(product);
-    if (!product || product.isDeleted) {
+    if (!product) {
       return next(
-        new Error(`Product ${item.productId} is no longer available`, {
+        new Error(`Product ${item.productId} not found in database`, {
           cause: 404,
         }),
+      );
+    }
+    if (product.isDeleted) {
+      return next(
+        new Error(
+          `Product "${product.title}" (${item.productId}) is marked as deleted`,
+          {
+            cause: 404,
+          },
+        ),
       );
     }
     if (product.stock < item.quantity) {
@@ -44,9 +52,11 @@ export const getCheckoutSummary = async (req, res, next) => {
   let discount = 0;
   let coupon = null;
 
-  if (req.query.couponCode) {
+  const couponCode = req.body.couponCode || req.query.couponCode;
+
+  if (couponCode) {
     coupon = await Coupon.findOne({
-      code: req.query.couponCode.toUpperCase(),
+      code: couponCode.toUpperCase(),
       isActive: true,
       expiresAt: { $gt: new Date() },
     });
@@ -81,9 +91,21 @@ export const placeOrder = async (req, res, next) => {
   const orderProducts = [];
   for (const item of cart.products) {
     const product = await Product.findById(item.productId);
-    if (!product || product.isDeleted) {
+    if (!product) {
       return next(
-        new Error(`Product ${item.productId} not found`, { cause: 404 }),
+        new Error(`Product ${item.productId} not found in database`, {
+          cause: 404,
+        }),
+      );
+    }
+    if (product.isDeleted) {
+      return next(
+        new Error(
+          `Product "${product.title}" (${item.productId}) is marked as deleted`,
+          {
+            cause: 404,
+          },
+        ),
       );
     }
 
