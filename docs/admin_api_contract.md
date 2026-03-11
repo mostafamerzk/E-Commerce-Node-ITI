@@ -98,7 +98,8 @@ This document outlines all admin-level APIs in the E-Commerce system, including 
   - **Description**: List all products with advanced admin filters.
   - **Auth**: `Admin`
   - **Validation (Query)**:
-    - `page`, `limit` (Optional)
+    - `page`: Number (Optional, Min: 1)
+    - `limit`: Number (Optional, Min: 1)
     - `sort`: `newest`, `oldest`, `priceHigh`, `priceLow`, `rating` (Optional)
     - `minPrice`, `maxPrice`: Number (Optional)
     - `rating`: 1-5 (Optional)
@@ -129,7 +130,9 @@ This document outlines all admin-level APIs in the E-Commerce system, including 
   - **Description**: List all orders with filters.
   - **Auth**: `Admin`
   - **Validation (Query)**:
-    - `page`, `limit`, `sort` (Optional)
+    - `page`: Number (Optional, Min: 1)
+    - `limit`: Number (Optional, Min: 1, Max: 30)
+    - `sort`: String (Optional)
     - `orderStatus`: `pending`, `confirmed`, `processing`, `shipped`, `delivered`, `cancelled`, `returned` (Optional)
     - `userId`: ObjectId (Optional)
     - `paymentStatus`: `unpaid`, `paid`, `refunded` (Optional)
