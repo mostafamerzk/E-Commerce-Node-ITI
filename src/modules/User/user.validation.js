@@ -1,7 +1,15 @@
 import joi from "joi";
 export const updateUser = joi
   .object({
-    userName: joi.string().min(5).max(15).required(),
+    userName: joi.string().min(5).max(15),
+    phone: joi.string(),
+    addressId: joi.string().hex().length(24),
+    address: joi.object({
+      street: joi.string().trim(),
+      city: joi.string().trim(),
+      country: joi.string().trim(),
+      postalCode: joi.string().trim(),
+    }),
   })
   .required();
 

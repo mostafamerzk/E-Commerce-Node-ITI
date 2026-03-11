@@ -35,19 +35,45 @@ export const profileImage = async (req, res, next) => {
 };
 
 export const updateProfile = async (req, res, next) => {
-  //date
-  const { userName } = req.body;
+  const { userName, phone, address, addressId } = req.body;
+  const userId = req.user._id;
 
-  const updatedUser = await User.findByIdAndUpdate(
-    { _id: req.user._id },
-    { userName },
-    {
-      runValidators: true,
-      returnDocument: "after",
-    },
-  );
-  return res.status(201).json({
-    success: "true",
+  if (userName || phone) {
+    const updateInfo = {};
+    if (userName) updateInfo.userName = userName;
+    if (phone) updateInfo.phone = phone;
+    await User.findByIdAndUpdate(userId, updateInfo, { runValidators: true });
+  }
+
+  if (addressId && address) {
+    await User.updateOne(
+      { _id: userId, "address._id": addressId },
+      {
+        $set: {
+          "address.$.street": address.street,
+          "address.$.city": address.city,
+          "address.$.country": address.country,
+          "address.$.postalCode": address.postalCode,
+        },
+      },
+      { runValidators: true },
+    );
+  } else if (address && !addressId) {
+    await User.findByIdAndUpdate(
+      userId,
+      { $push: { address: address } },
+      { runValidators: true },
+    );
+  } else if (addressId && !address) {
+    await User.findByIdAndUpdate(
+      userId,
+      { $pull: { address: { _id: addressId } } },
+      { runValidators: true },
+    );
+  }
+
+  return res.status(200).json({
+    success: true,
     message: "updated successfully",
   });
 };
