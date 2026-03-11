@@ -51,31 +51,6 @@ export const updateProfile = async (req, res, next) => {
     message: "updated successfully",
   });
 };
-
-export const updateAddress = async (req, res, next) => {
-  const { street, city, zipCode, country } = req.body;
-
-  const updatedUser = await User.findByIdAndUpdate(
-    { _id: req.user._id },
-    {
-      $set: {
-        "address.street": street,
-        "address.city": city,
-        "address.country": country,
-        "address.zipCode": zipCode,
-      },
-    },
-    { runValidators: true, returnDocument: "after" },
-  );
-
-  return res.status(200).json({
-    success: "true",
-    message: "Address updated successfully",
-    data: updatedUser.address,
-  });
-};
-
-
 export const changePassword = async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
 
