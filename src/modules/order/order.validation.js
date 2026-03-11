@@ -5,11 +5,11 @@ import { paymentMethods } from "../../utils/enums/enums.js";
 export const checkoutSummarySchema = Joi.object({
   couponCode: Joi.string().trim().optional(),
   shippingAddress: Joi.object({
-    street: Joi.string().required(),
-    city: Joi.string().required(),
-    country: Joi.string().required(),
-    postalCode: Joi.string(),
-    phone: Joi.string().required(),
+    street: Joi.string().allow("").optional(),
+    city: Joi.string().allow("").optional(),
+    country: Joi.string().allow("").optional(),
+    postalCode: Joi.string().allow("").optional(),
+    phone: Joi.string().allow("").optional(),
   }).optional(),
 }).optional();
 
