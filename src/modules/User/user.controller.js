@@ -28,7 +28,7 @@ userRouter
   .route("/profile/image")
   .post(
     asyncHandler(isAuthenticated),
-    isAuthorized(roles.user),
+    isAuthorized(roles.user, roles.admin),
     uploadCloud(fileValidations.Image).single("image"),
     asyncHandler(userService.profileImage),
   );
