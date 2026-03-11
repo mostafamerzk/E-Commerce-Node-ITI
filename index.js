@@ -2,10 +2,12 @@ import "dotenv/config";
 import bootstrap from "./src/modules/app.controller.js";
 import express from "express";
 import { connectionDB } from "./src/DB/connection.js";
+import { initCleanupCron } from "./src/utils/cron/cleanup.cron.js";
 const app = express();
 
 await bootstrap(app, express);
 await connectionDB();
+initCleanupCron();
 
 const PORT = process.env.PORT || 3000;
 

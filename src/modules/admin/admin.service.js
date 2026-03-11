@@ -2,14 +2,17 @@ import { User } from "../../DB/Models/user.js";
 import { Product } from "../../DB/Models/product.js";
 import { Order } from "../../DB/Models/order.js";
 import { Banner } from "../../DB/Models/banner.js";
+import { Coupon } from "../../DB/Models/coupon.js";
+import { Review } from "../../DB/Models/review.js";
+import mongoose from "mongoose";
 import * as productFiltersBuilder from "../../utils/product/build.js";
 import * as orderFiltersBuilder from "../../utils/order/build.js";
 import * as bannerFiltersBuilder from "../../utils/banner/build.js";
 import { orderStatus } from "../../utils/enums/enums.js";
 import { cloud } from "../../utils/multer/cloud.config.js";
 import { orderEvent } from "../../utils/email/email.event.js";
+import * as userFiltersBuilder from "../../utils/user/build.js";
 //Admin data Retrival
-
 /**
  * Retrieve all users with pagination and sorted by creation date
  *
@@ -31,16 +34,24 @@ import { orderEvent } from "../../utils/email/email.event.js";
  * // Request: GET /admin/users?page=1&limit=10
  * // Response: { message: "all users", data: { docs: [...], total: 50, pages: 5, page: 1 } }
  */
-export const getAllUsers = async (req, res, next) => {
+export const getAllUsers = async (req, res, next) => {  
   const options = {
     page: req.query.page || 1,
     limit: req.query.limit || 10,
-    sort: { createdAt: -1 },
-  };
+    sort: userFiltersBuilder.sortObject(req.query.sort),
+  }
+  const filter = userFiltersBuilder.filterObject(req.query);
 
-  const users = await User.paginate({}, options);
+  const users = await User.paginate(filter, options);
 
-  return res.status(200).json({ message: "all users", data: users });
+  return res.status(200).json({
+    message: "all users",
+    data: users,
+    total: users.totalDocs,
+    pages: users.totalPages,
+    page: users.page,
+    docs: users.docs,
+  });
 };
 
 /**
@@ -136,7 +147,11 @@ export const getAllProducts = async (req, res) => {
 
   return res.status(200).json({
     message: "Products fetched successfully",
-    products: products,
+    products: products.docs,
+    data: products,
+    total: products.totalDocs,
+    pages: products.totalPages,
+    page: products.page,
   });
 };
 
@@ -212,7 +227,11 @@ export const getAllOrders = async (req, res) => {
 
   return res.status(200).json({
     message: "Orders fetched successfully",
-    orders: orders,
+    orders: orders.docs,
+    data: orders,
+    total: orders.totalDocs,
+    pages: orders.totalPages,
+    page: orders.page,
   });
 };
 export const getOrderById = async (req, res, next) => {
@@ -332,7 +351,11 @@ export const getAllBanners = async (req, res) => {
 
   return res.status(200).json({
     message: "Banners fetched successfully",
-    banners: banners,
+    banners: banners.docs,
+    data: banners,
+    total: banners.totalDocs,
+    pages: banners.totalPages,
+    page: banners.page,
   });
 };
 
@@ -518,5 +541,236 @@ export const activateBanner = async (req, res, next) => {
   return res.status(200).json({
     message: "Banner activated successfully",
     banner: banner,
+  });
+};
+
+// --- NEW ENDPOINTS ---
+
+export const getAnalytics = async (req, res, next) => {
+  const { startDate, endDate } = req.query;
+
+  const dateFilter = {};
+  if (startDate || endDate) {
+    dateFilter.createdAt = {};
+    if (startDate) dateFilter.createdAt.$gte = new Date(startDate);
+    if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
+  }
+
+  const counts = await Promise.all([
+    User.countDocuments(),
+    User.countDocuments({ role: "seller" }),
+    Product.countDocuments(),
+    Order.countDocuments(),
+  ]);
+
+  const [totalUsers, totalSellers, totalProducts, totalOrders] = counts;
+
+  // Calculate dynamic limit for byDay
+  let dailyLimit = 7;
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    dailyLimit = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  // Revenue analytics
+  const revenue = await Order.aggregate([
+    { $match: { paymentStatus: "paid", ...dateFilter } },
+    {
+      $facet: {
+        totalRevenue: [
+          { $group: { _id: null, total: { $sum: "$totalPrice" } } },
+        ],
+        byDay: [
+          {
+            $group: {
+              _id: {
+                $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+              },
+              total: { $sum: "$totalPrice" },
+            },
+          },
+          { $sort: { _id: -1 } },
+          { $limit: dailyLimit },
+        ],
+        byMonth: [
+          {
+            $group: {
+              _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+              total: { $sum: "$totalPrice" },
+            },
+          },
+          { $sort: { _id: -1 } },
+          { $limit: 12 },
+        ],
+      },
+    },
+  ]);
+
+  // Top products
+  const topProducts = await Order.aggregate([
+    { $match: dateFilter },
+    { $unwind: "$products" },
+    {
+      $group: {
+        _id: "$products.productId",
+        title: { $first: "$products.title" },
+        soldQuantity: { $sum: "$products.quantity" },
+      },
+    },
+    { $sort: { soldQuantity: -1 } },
+    { $limit: 5 },
+  ]);
+
+  // Low stock
+  const lowStock = await Product.find({
+    stock: { $lte: 10 },
+    isDeleted: false,
+  }).limit(10);
+
+  // Orders by status
+  const ordersByStatus = await Order.aggregate([
+    { $match: dateFilter },
+    { $group: { _id: "$orderStatus", count: { $sum: 1 } } },
+  ]);
+
+  return res.status(200).json({
+    message: "Analytics fetched successfully",
+    data: {
+      counts: { totalUsers, totalSellers, totalProducts, totalOrders },
+      revenue: revenue[0],
+      topProducts,
+      lowStock,
+      ordersByStatus,
+    },
+  });
+};
+
+export const getAllSellers = async (req, res, next) => {
+  req.query.role = "seller";
+  return getAllUsers(req, res, next);
+};
+
+export const getSellerById = async (req, res, next) => {
+  const { id } = req.params;
+  const seller = await User.findOne({ _id: id, role: "seller" });
+  if (!seller) return next(new Error("Seller not found", { cause: 404 }));
+
+  const products = await Product.find({ createdBy: id, isDeleted: false });
+
+  return res.status(200).json({
+    message: "Seller found",
+    data: { seller, products },
+  });
+};
+
+export const approveSeller = async (req, res, next) => {
+  const { id } = req.params;
+  const seller = await User.findOneAndUpdate(
+    { _id: id, role: "seller" },
+    { isBlocked: false },
+    { new: true },
+  );
+  if (!seller) return next(new Error("Seller not found", { cause: 404 }));
+  return res.status(200).json({ message: "Seller approved", data: seller });
+};
+
+export const restrictSeller = async (req, res, next) => {
+  const { id } = req.params;
+  const seller = await User.findOneAndUpdate(
+    { _id: id, role: "seller" },
+    { isBlocked: true },
+    { new: true },
+  );
+  if (!seller) return next(new Error("Seller not found", { cause: 404 }));
+  return res.status(200).json({ message: "Seller restricted", data: seller });
+};
+
+export const updateUserRole = async (req, res, next) => {
+  const { id } = req.params;
+  const { role } = req.body;
+
+  if (id === req.user._id.toString()) {
+    return next(new Error("You cannot change your own role", { cause: 400 }));
+  }
+
+  const user = await User.findByIdAndUpdate(id, { role }, { new: true });
+  if (!user) return next(new Error("User not found", { cause: 404 }));
+
+  return res.status(200).json({ message: "User role updated", data: user });
+};
+
+// Coupons
+export const createCoupon = async (req, res, next) => {
+  const coupon = await Coupon.create({ ...req.body, createdBy: req.user._id });
+  return res.status(201).json({ message: "Coupon created", data: coupon });
+};
+
+export const getAllCoupons = async (req, res, next) => {
+  const { page = 1, limit = 10, isActive } = req.query;
+  const filter = {};
+  if (isActive !== undefined) filter.isActive = isActive === "true";
+
+  const coupons = await Coupon.paginate(filter, {
+    page,
+    limit,
+    sort: { createdAt: -1 },
+  });
+
+  return res.status(200).json({
+    message: "Coupons fetched successfully",
+    data: coupons,
+    total: coupons.totalDocs,
+    pages: coupons.totalPages,
+    page: coupons.page,
+    docs: coupons.docs,
+  });
+};
+
+export const getCouponById = async (req, res, next) => {
+  const coupon = await Coupon.findById(req.params.id);
+  if (!coupon) return next(new Error("Coupon not found", { cause: 404 }));
+  return res.status(200).json({ message: "Coupon found", data: coupon });
+};
+
+export const updateCoupon = async (req, res, next) => {
+  const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  if (!coupon) return next(new Error("Coupon not found", { cause: 404 }));
+  return res.status(200).json({ message: "Coupon updated", data: coupon });
+};
+
+export const deleteCoupon = async (req, res, next) => {
+  const coupon = await Coupon.findByIdAndUpdate(
+    req.params.id,
+    { isActive: false },
+    { new: true },
+  );
+  if (!coupon) return next(new Error("Coupon not found", { cause: 404 }));
+  return res.status(200).json({ message: "Coupon soft deleted", data: coupon });
+};
+
+// Reviews
+export const getAllReviews = async (req, res, next) => {
+  const { page = 1, limit = 10, productId, userId, rating } = req.query;
+  const filter = {};
+  if (productId) filter.productId = productId;
+  if (userId) filter.userId = userId;
+  if (rating) filter.rating = rating;
+
+  const reviews = await Review.paginate(filter, {
+    page,
+    limit,
+    sort: { createdAt: -1 },
+  });
+
+  return res.status(200).json({
+    message: "Reviews fetched successfully",
+    data: reviews,
+    total: reviews.totalDocs,
+    pages: reviews.totalPages,
+    page: reviews.page,
+    docs: reviews.docs,
   });
 };

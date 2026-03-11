@@ -20,11 +20,9 @@ export const changePassword = joi
   })
   .required();
 
-  export const updateAddress = {
-    body: Joi.object({
-      street:  Joi.string().required(),
-      city:    Joi.string().required(),
-      zipCode: Joi.string().optional(),
-      country: Joi.string().required(),
-    }),
-  };
+  export const updateAddress = joi.object({
+    street:  joi.string().optional(),
+    city:    joi.string().optional(),
+    country: joi.string().optional(),
+    zipCode: joi.string().optional(),
+  }).required();

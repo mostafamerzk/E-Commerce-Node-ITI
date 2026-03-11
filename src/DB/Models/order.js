@@ -24,6 +24,9 @@ const orderSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        description: {
+          type: String,
+        },
         quantity: {
           type: Number,
           required: true,
@@ -33,6 +36,21 @@ const orderSchema = new mongoose.Schema(
           type: Number,
           required: true,
           min: 0,
+        },
+        price: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        discount: {
+          type: Number,
+          default: 0,
+          min: 0,
+          max: 100,
+        },
+        mainImage: {
+          secure_url: { type: String },
+          public_id: { type: String },
         },
       },
     ],
@@ -71,10 +89,21 @@ const orderSchema = new mongoose.Schema(
     stripeSessionId: {
       type: String,
     },
+    paidAt: {
+      type: Date,
+    },
+    couponId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Coupons",
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true },
 );
 orderSchema.plugin(mongoosePaginate);
-
 
 export const Order = mongoose.model("Orders", orderSchema);

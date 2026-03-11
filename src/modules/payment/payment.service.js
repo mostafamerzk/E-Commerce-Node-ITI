@@ -1,5 +1,7 @@
 import { stripe } from "../../utils/stripe/stripe.js";
 import { Order } from "../../DB/Models/order.js";
+import { Product } from "../../DB/Models/product.js";
+import { orderEvent } from "../../utils/email/email.event.js";
 import {
   orderStatus,
   paymentMethods,
@@ -33,8 +35,13 @@ export const createCheckoutSession = async (req, res, next) => {
     mode: "payment",
     customer_email: req.user.email,
     metadata: { orderId: orderId.toString() },
-    cancel_url: process.env.CANCEL_URL || "http://localhost:3000/cancel",
-    success_url: process.env.SUCCESS_URL || "http://localhost:3000/success",
+    expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes from now
+    cancel_url:
+      process.env.CANCEL_URL ||
+      "https://e-commrece-client-five.vercel.app/payment/cancel",
+    success_url:
+      process.env.SUCCESS_URL ||
+      "https://e-commrece-client-five.vercel.app/payment/success",
     line_items: order.products.map((product) => {
       return {
         price_data: {
@@ -74,19 +81,81 @@ export const handleWebhook = async (req, res, next) => {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const order = await Order.findOneAndUpdate(
-      { stripeSessionId: session.id },
-      {
-        paymentStatus: paymentStatus.paid,
-        orderStatus: orderStatus.confirmed,
-      },
-      { new: true },
-    );
+    const orderId = session.metadata.orderId;
 
+    const order = await Order.findById(orderId);
     if (!order) {
-      console.error(`Order not found for session ${session.id}`);
-    } else {
-      console.log(`Order ${order._id} paid successfully`);
+      console.error(`Order not found: ${orderId}`);
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.paymentStatus === paymentStatus.paid) {
+      return res.status(200).json({ received: true });
+    }
+
+    // Deduct stock
+    for (const item of order.products) {
+      await Product.findByIdAndUpdate(item.productId, {
+        $inc: { stock: -item.quantity },
+      });
+    }
+
+    order.paymentStatus = paymentStatus.paid;
+    order.orderStatus = orderStatus.confirmed;
+    order.paidAt = new Date();
+    await order.save();
+
+    // Fetch receipt URL from Stripe
+    let receiptUrl = "";
+    try {
+      if (session.payment_intent) {
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          session.payment_intent,
+        );
+        if (paymentIntent.latest_charge) {
+          const charge = await stripe.charges.retrieve(
+            paymentIntent.latest_charge,
+          );
+          receiptUrl = charge.receipt_url;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching Stripe receipt:", error);
+    }
+
+    // Send payment success email
+    const populatedOrder = await Order.findById(orderId).populate("userId");
+    if (populatedOrder && populatedOrder.userId) {
+      orderEvent.emit(
+        "paymentSuccess",
+        populatedOrder.userId.email,
+        populatedOrder,
+        receiptUrl,
+      );
+    }
+
+    console.log(`Order ${order._id} paid and stock deducted successfully`);
+  }
+
+  if (event.type === "checkout.session.expired") {
+    const session = event.data.object;
+    const orderId = session.metadata.orderId;
+
+    const order = await Order.findOneAndUpdate(
+      { _id: orderId, orderStatus: orderStatus.pending },
+      { orderStatus: orderStatus.cancelled },
+      { new: true },
+    ).populate("userId");
+
+    if (order && order.userId) {
+      // Send cancellation email
+      orderEvent.emit(
+        "orderStatusUpdate",
+        order.userId.email,
+        order,
+        orderStatus.cancelled,
+      );
+      console.log(`Order ${orderId} cancelled due to session expiration`);
     }
   }
 

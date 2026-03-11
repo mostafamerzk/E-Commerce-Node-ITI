@@ -6,120 +6,251 @@ import { isAuthenticated } from "../../middleware/auth.middleware.js";
 import { roles } from "../../utils/enums/enums.js";
 import { validation } from "../../middleware/validation.middleware.js";
 import * as adminValidation from "./admin.validation.js";
-import { uploadCloud, fileValidations } from "../../utils/multer/cloudUpload.js";
+import {
+  uploadCloud,
+  fileValidations,
+} from "../../utils/multer/cloudUpload.js";
 export const adminRoutes = express.Router();
 //1
-adminRoutes.route("/users")
-    .get(
-        validation(adminValidation.getAllUsersSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.getAllUsers));
+adminRoutes
+  .route("/users")
+  .get(
+    validation(adminValidation.getAllUsersSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getAllUsers),
+  );
 //2
-adminRoutes.route("/users/:id")
-    .get(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.getUserById))
+adminRoutes
+  .route("/users/:id")
+  .get(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getUserById),
+  );
 //3
-adminRoutes.route("/users/:id/restrict")
-    .patch(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.restrictUser))
+adminRoutes
+  .route("/users/:id/restrict")
+  .patch(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.restrictUser),
+  );
 //4
-adminRoutes.route("/users/:id/approve")
-    .patch(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.approveUser))
+adminRoutes
+  .route("/users/:id/approve")
+  .patch(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.approveUser),
+  );
+//4.5
+adminRoutes
+  .route("/users/:id/role")
+  .patch(
+    validation(adminValidation.updateRoleSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.updateUserRole),
+  );
 //5
-adminRoutes.route("/products")
-    .get(
-        validation(adminValidation.getAllProductsSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.getAllProducts))
+adminRoutes
+  .route("/products")
+  .get(
+    validation(adminValidation.getAllProductsSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getAllProducts),
+  );
 //6
-adminRoutes.route("/products/:id")
-    .get(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.getProductById))
+adminRoutes
+  .route("/products/:id")
+  .get(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getProductById),
+  );
 //7
-adminRoutes.route("/products/:id")
-    .delete(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.deleteProduct))
-//8        
-adminRoutes.route("/products/:id/recover")
-    .patch(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.recoverProduct))
+adminRoutes
+  .route("/products/:id")
+  .delete(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.deleteProduct),
+  );
+//8
+adminRoutes
+  .route("/products/:id/recover")
+  .patch(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.recoverProduct),
+  );
 //9
-adminRoutes.route("/orders")
-    .get(
-        validation(adminValidation.getAllOrdersSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.getAllOrders))
+adminRoutes
+  .route("/orders")
+  .get(
+    validation(adminValidation.getAllOrdersSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getAllOrders),
+  );
 //10
-adminRoutes.route("/orders/:id")
-    .get(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.getOrderById))
+adminRoutes
+  .route("/orders/:id")
+  .get(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getOrderById),
+  );
 //11
-adminRoutes.route("/orders/:id/status")
-    .patch(
-        validation(adminValidation.updateOrderStatusSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.updateOrderStatus))  
+adminRoutes
+  .route("/orders/:id/status")
+  .patch(
+    validation(adminValidation.updateOrderStatusSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.updateOrderStatus),
+  );
 //12
-adminRoutes.route("/banners")
-    .get(
-        validation(adminValidation.getAllBannersSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.getAllBanners))
-    .post(
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        uploadCloud(fileValidations.Image).single("image"),
-        validation(adminValidation.createBannerSchema),
-        asyncHandler(adminService.createBanner))
+adminRoutes
+  .route("/banners")
+  .get(
+    validation(adminValidation.getAllBannersSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getAllBanners),
+  )
+  .post(
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    uploadCloud(fileValidations.Image).single("image"),
+    validation(adminValidation.createBannerSchema),
+    asyncHandler(adminService.createBanner),
+  );
 
-adminRoutes.route("/banners/:id")
-    .get(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.getBannerById))
-    .patch(
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        uploadCloud(fileValidations.Image).single("image"),
-        validation(adminValidation.updateBannerSchema),
-        asyncHandler(adminService.updateBanner))
-    .delete(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.deActivateBanner))
+adminRoutes
+  .route("/banners/:id")
+  .get(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getBannerById),
+  )
+  .patch(
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    uploadCloud(fileValidations.Image).single("image"),
+    validation(adminValidation.updateBannerSchema),
+    asyncHandler(adminService.updateBanner),
+  )
+  .delete(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.deActivateBanner),
+  );
 //16
-adminRoutes.route("/banners/:id/activate")
-    .patch(
-        validation(adminValidation.getByIdSchema),
-        asyncHandler(isAuthenticated),
-        isAuthorized(roles.admin),
-        asyncHandler(adminService.activateBanner))
+adminRoutes
+  .route("/banners/:id/activate")
+  .patch(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.activateBanner),
+  );
+
+// Analytics
+adminRoutes.get(
+  "/analytics",
+  validation(adminValidation.getAnalyticsSchema),
+  asyncHandler(isAuthenticated),
+  isAuthorized(roles.admin),
+  asyncHandler(adminService.getAnalytics),
+);
+
+// Seller Management
+adminRoutes.get(
+  "/sellers",
+  validation(adminValidation.getAllUsersSchema),
+  asyncHandler(isAuthenticated),
+  isAuthorized(roles.admin),
+  asyncHandler(adminService.getAllSellers),
+);
+
+adminRoutes
+  .route("/sellers/:id")
+  .get(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getSellerById),
+  );
+
+adminRoutes.patch(
+  "/sellers/:id/approve",
+  validation(adminValidation.getByIdSchema),
+  asyncHandler(isAuthenticated),
+  isAuthorized(roles.admin),
+  asyncHandler(adminService.approveSeller),
+);
+
+adminRoutes.patch(
+  "/sellers/:id/restrict",
+  validation(adminValidation.getByIdSchema),
+  asyncHandler(isAuthenticated),
+  isAuthorized(roles.admin),
+  asyncHandler(adminService.restrictSeller),
+);
+
+// Coupon Management
+adminRoutes
+  .route("/coupons")
+  .post(
+    validation(adminValidation.createCouponSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.createCoupon),
+  )
+  .get(
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getAllCoupons),
+  );
+
+adminRoutes
+  .route("/coupons/:id")
+  .get(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.getCouponById),
+  )
+  .patch(
+    validation(adminValidation.updateCouponSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.updateCoupon),
+  )
+  .delete(
+    validation(adminValidation.getByIdSchema),
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.admin),
+    asyncHandler(adminService.deleteCoupon),
+  );
+
+// Reviews Moderation
+adminRoutes.get(
+  "/reviews",
+  validation(adminValidation.getAllReviewsSchema),
+  asyncHandler(isAuthenticated),
+  isAuthorized(roles.admin),
+  asyncHandler(adminService.getAllReviews),
+);

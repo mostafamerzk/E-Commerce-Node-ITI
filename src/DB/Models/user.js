@@ -41,6 +41,7 @@ const user = new mongoose.Schema(
     role: { type: String, enum: Object.values(roles), default: "user" },
     passwordChangeTime: Date,
     isDeleted: { type: Boolean, default: false },
+    isBlocked: { type: Boolean, default: false },
     isLogged: { type: Boolean, default: false },
     provider: {
       type: String,
@@ -48,11 +49,14 @@ const user = new mongoose.Schema(
       default: providers.system,
     },
 
-    phone: { type: String, default: "",
+    phone: {
+      type: String,
+      default: "",
       required: function () {
         return this.role === "seller";
       }
      },
+     
      address: {
       street:     { type: String, default: "" },
       city:       { type: String, default: "" },
@@ -65,21 +69,23 @@ const user = new mongoose.Schema(
         ref: "Products",
       },
     ],
-    storename:{
-      type:String,
-      required:function () {
+    storename: {
+      type: String,
+      required: function () {
         return this.role === "seller";
-    }
-  },storeDescription: {
-    type: String,
-    required: function () {
-      return this.role === "seller";
-    }
-  },
+      },
+    },
+    storeDescription: {
+      type: String,
+      required: function () {
+        return this.role === "seller";
+      },
+    },
   },
   { timestamps: true },
 );
 user.plugin(mongoosePaginate);
+user.index({ userName: "text", storename: "text" });
 user.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = hash({ plainText: this.password });
