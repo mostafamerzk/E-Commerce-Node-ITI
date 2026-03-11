@@ -54,16 +54,15 @@ const user = new mongoose.Schema(
       default: "",
       required: function () {
         return this.role === "seller";
-      },
+      }
+     },
+     
+     address: {
+      street:     { type: String, default: "" },
+      city:       { type: String, default: "" },
+      country:    { type: String, default: "" },
+      zipCode:    { type: String, default: "" },
     },
-    address: [
-      {
-        street: { type: String, default: "" },
-        city: { type: String, default: "" },
-        country: { type: String, default: "" },
-        postalCode: { type: String, default: "" },
-      },
-    ],
     wishlist: [
       {
         type: mongoose.Schema.Types.ObjectId,
