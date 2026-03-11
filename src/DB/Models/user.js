@@ -86,7 +86,6 @@ const user = new mongoose.Schema(
   { timestamps: true },
 );
 user.plugin(mongoosePaginate);
-user.index({ userName: "text", storename: "text" });
 user.pre("save", async function (next) {
   if (this.isModified("password")) {
     this.password = hash({ plainText: this.password });

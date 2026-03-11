@@ -39,9 +39,6 @@ export const filterObject = (query) => {
     if (query.search) {
         filter.$text = {$search: query.search};
     }
-    if (query.isDeleted === "true") {
-        filter.isDeleted = query.isDeleted === "true";
-    }
 
     return filter;
 };

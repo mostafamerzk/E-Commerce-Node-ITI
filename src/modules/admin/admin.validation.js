@@ -8,33 +8,30 @@ import {
 } from "../../utils/enums/enums.js";
 
 export const getAllUsersSchema = Joi.object({
-
-    page: Joi.number().optional().min(1),
-    limit: Joi.number().optional().min(10).max(100),
-    sort: Joi.string().valid("newest", "oldest", "byRole", "byName").optional(),
-    role: Joi.string().valid("admin", "seller", "user").optional(),
-    isDeleted: Joi.string().valid("true", "false").optional(),
-    isLogged: Joi.string().valid("true", "false").optional(),
-    country: Joi.string().optional(),
-    city: Joi.string().optional(),
-    search: Joi.string().min(2).optional(), 
+  page: Joi.number().optional().min(1),
+  limit: Joi.number().optional().min(1).max(30),
+  search: Joi.string().optional(),
+  role: Joi.string()
+    .valid(...Object.values(roles))
+    .optional(),
+  isBlocked: Joi.boolean().optional(),
 });
 export const getByIdSchema = Joi.object({
   id: Joi.string().custom(isValidObjectId).required(),
 });
 
 export const getAllProductsSchema = Joi.object({
-
-    page: Joi.number().min(1).optional(),
-    limit: Joi.number().min(10).optional(),
-    sort: Joi.string().valid("newest", "oldest", "priceHigh", "priceLow", "rating").optional(),
-    minPrice: Joi.number().min(0).optional(),
-    maxPrice: Joi.number().min(0).optional(),
-    rating: Joi.number().valid(1,2,3,4,5).optional(),
-    inStock: Joi.string().valid("true", "false").optional(),
-    isDeleted: Joi.string().valid("true", "false").optional(),
-    search: Joi.string().min(2).optional(),
-    category: Joi.string().custom(isValidObjectId).optional(),
+  page: Joi.number().min(1).optional(),
+  limit: Joi.number().min(1).optional(),
+  sort: Joi.string()
+    .valid("newest", "oldest", "priceHigh", "priceLow", "rating")
+    .optional(),
+  minPrice: Joi.number().min(0).optional(),
+  maxPrice: Joi.number().min(0).optional(),
+  rating: Joi.number().valid(1, 2, 3, 4, 5).optional(),
+  inStock: Joi.string().valid("true", "false").optional(),
+  search: Joi.string().min(2).optional(),
+  category: Joi.string().custom(isValidObjectId).optional(),
 });
 export const getAllOrdersSchema = Joi.object({
   page: Joi.number().integer().min(1).optional(),
