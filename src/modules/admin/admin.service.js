@@ -11,8 +11,8 @@ import * as bannerFiltersBuilder from "../../utils/banner/build.js";
 import { orderStatus } from "../../utils/enums/enums.js";
 import { cloud } from "../../utils/multer/cloud.config.js";
 import { orderEvent } from "../../utils/email/email.event.js";
+import * as userFiltersBuilder from "../../utils/user/build.js";
 //Admin data Retrival
-
 /**
  * Retrieve all users with pagination and sorted by creation date
  *
@@ -34,26 +34,13 @@ import { orderEvent } from "../../utils/email/email.event.js";
  * // Request: GET /admin/users?page=1&limit=10
  * // Response: { message: "all users", data: { docs: [...], total: 50, pages: 5, page: 1 } }
  */
-export const getAllUsers = async (req, res, next) => {
-  const { page = 1, limit = 10, search, role, isBlocked } = req.query;
+export const getAllUsers = async (req, res, next) => {  
   const options = {
-    page: parseInt(page),
-    limit: parseInt(limit),
-    sort: { createdAt: -1 },
-  };
-
-  const filter = {};
-  if (search) {
-    filter.$or = [
-      { userName: { $regex: search, $options: "i" } },
-      { email: { $regex: search, $options: "i" } },
-    ];
+    page: req.query.page || 1,
+    limit: req.query.limit || 10,
+    sort: userFiltersBuilder.sortObject(req.query.sort),
   }
-  if (role) filter.role = role;
-  if (isBlocked !== undefined) {
-    const statusField = role === "seller" ? "isBlocked" : "isDeleted";
-    filter[statusField] = isBlocked === "true" ? true : { $ne: true };
-  }
+  const filter = userFiltersBuilder.filterObject(req.query);
 
   const users = await User.paginate(filter, options);
 
