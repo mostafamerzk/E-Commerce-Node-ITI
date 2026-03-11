@@ -19,7 +19,9 @@ export const getCheckoutSummary = async (req, res, next) => {
   // Recalculate subtotal from actual product prices (finalPrice) for accuracy
   let subtotal = 0;
   for (const item of cart.products) {
+    console.log(item);
     const product = await Product.findById(item.productId);
+    console.log(product);
     if (!product || product.isDeleted) {
       return next(
         new Error(`Product ${item.productId} is no longer available`, {
