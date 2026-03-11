@@ -557,6 +557,15 @@ export const activateBanner = async (req, res, next) => {
 // --- NEW ENDPOINTS ---
 
 export const getAnalytics = async (req, res, next) => {
+  const { startDate, endDate } = req.query;
+
+  const dateFilter = {};
+  if (startDate || endDate) {
+    dateFilter.createdAt = {};
+    if (startDate) dateFilter.createdAt.$gte = new Date(startDate);
+    if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
+  }
+
   const counts = await Promise.all([
     User.countDocuments(),
     User.countDocuments({ role: "seller" }),
@@ -566,9 +575,17 @@ export const getAnalytics = async (req, res, next) => {
 
   const [totalUsers, totalSellers, totalProducts, totalOrders] = counts;
 
+  // Calculate dynamic limit for byDay
+  let dailyLimit = 7;
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    dailyLimit = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  }
+
   // Revenue analytics
   const revenue = await Order.aggregate([
-    { $match: { paymentStatus: "paid" } },
+    { $match: { paymentStatus: "paid", ...dateFilter } },
     {
       $facet: {
         totalRevenue: [
@@ -584,7 +601,7 @@ export const getAnalytics = async (req, res, next) => {
             },
           },
           { $sort: { _id: -1 } },
-          { $limit: 7 },
+          { $limit: dailyLimit },
         ],
         byMonth: [
           {
@@ -602,6 +619,7 @@ export const getAnalytics = async (req, res, next) => {
 
   // Top products
   const topProducts = await Order.aggregate([
+    { $match: dateFilter },
     { $unwind: "$products" },
     {
       $group: {
@@ -622,6 +640,7 @@ export const getAnalytics = async (req, res, next) => {
 
   // Orders by status
   const ordersByStatus = await Order.aggregate([
+    { $match: dateFilter },
     { $group: { _id: "$orderStatus", count: { $sum: 1 } } },
   ]);
 

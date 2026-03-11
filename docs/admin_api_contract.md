@@ -13,7 +13,22 @@ This document outlines all admin-level APIs in the E-Commerce system, including 
 - **GET `/admin/analytics`**
   - **Description**: Retrieves aggregated data for the admin dashboard (counts, revenue, top products, etc.).
   - **Auth**: `Admin`
-  - **Validation**: None.
+  - **Validation (Query)**:
+    - `startDate`: ISO Date (Optional)
+    - `endDate`: ISO Date (Optional)
+  - **Success Response**: `200 OK`
+    ```json
+    {
+      "message": "Analytics fetched successfully",
+      "data": {
+        "counts": { "totalUsers": 100, "totalSellers": 20, "totalProducts": 50, "totalOrders": 200 },
+        "revenue": { "totalRevenue": [...], "byDay": [...], "byMonth": [...] },
+        "topProducts": [...],
+        "lowStock": [...],
+        "ordersByStatus": [...]
+      }
+    }
+    ```
 
 ### **User Management**
 
@@ -22,7 +37,7 @@ This document outlines all admin-level APIs in the E-Commerce system, including 
   - **Auth**: `Admin`
   - **Validation (Query)**:
     - `page`: Number (Optional, Min: 1)
-    - `limit`: Number (Optional, Min: 10, Max: 30)
+    - `limit`: Number (Optional, Min: 1, Max: 30)
     - `search`: String (Optional, Username/Email)
     - `role`: String (Optional, `user`, `admin`, `seller`)
     - `isBlocked`: Boolean (Optional)

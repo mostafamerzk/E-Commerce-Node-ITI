@@ -107,8 +107,13 @@ export const updateCouponSchema = Joi.object({
 
 export const getAllReviewsSchema = Joi.object({
   page: Joi.number().optional().min(1),
-  limit: Joi.number().optional().min(1).max(30),
+  limit: Joi.number().optional().min(1),
   productId: Joi.string().custom(isValidObjectId).optional(),
   userId: Joi.string().custom(isValidObjectId).optional(),
   rating: Joi.number().valid(1, 2, 3, 4, 5).optional(),
+});
+
+export const getAnalyticsSchema = Joi.object({
+  startDate: Joi.date().iso().optional(),
+  endDate: Joi.date().iso().greater(Joi.ref("startDate")).optional(),
 });

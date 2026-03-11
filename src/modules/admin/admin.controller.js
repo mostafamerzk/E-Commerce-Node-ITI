@@ -170,6 +170,7 @@ adminRoutes
 // Analytics
 adminRoutes.get(
   "/analytics",
+  validation(adminValidation.getAnalyticsSchema),
   asyncHandler(isAuthenticated),
   isAuthorized(roles.admin),
   asyncHandler(adminService.getAnalytics),
