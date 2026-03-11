@@ -9,7 +9,7 @@ import {
 
 export const getAllUsersSchema = Joi.object({
   page: Joi.number().optional().min(1),
-  limit: Joi.number().optional().min(10).max(30),
+  limit: Joi.number().optional().min(1).max(30),
   search: Joi.string().optional(),
   role: Joi.string()
     .valid(...Object.values(roles))
@@ -22,7 +22,7 @@ export const getByIdSchema = Joi.object({
 
 export const getAllProductsSchema = Joi.object({
   page: Joi.number().min(1).optional(),
-  limit: Joi.number().min(10).optional(),
+  limit: Joi.number().min(1).optional(),
   sort: Joi.string()
     .valid("newest", "oldest", "priceHigh", "priceLow", "rating")
     .optional(),
@@ -35,7 +35,7 @@ export const getAllProductsSchema = Joi.object({
 });
 export const getAllOrdersSchema = Joi.object({
   page: Joi.number().integer().min(1).optional(),
-  limit: Joi.number().min(10).max(30).optional(),
+  limit: Joi.number().min(1).max(30).optional(),
   sort: Joi.string()
     .valid("newest", "oldest", "totalHigh", "totalLow", "status")
     .optional(),
@@ -62,7 +62,7 @@ export const updateOrderStatusSchema = Joi.object({
 });
 export const getAllBannersSchema = Joi.object({
   page: Joi.number().min(1).optional(),
-  limit: Joi.number().min(10).max(30).optional(),
+  limit: Joi.number().min(1).max(30).optional(),
   sort: Joi.string().valid("newest", "oldest", "title").optional(),
   isActive: Joi.string().valid("true", "false").optional(),
   search: Joi.string().min(2).optional(),
@@ -107,7 +107,7 @@ export const updateCouponSchema = Joi.object({
 
 export const getAllReviewsSchema = Joi.object({
   page: Joi.number().optional().min(1),
-  limit: Joi.number().optional().min(10).max(30),
+  limit: Joi.number().optional().min(1).max(30),
   productId: Joi.string().custom(isValidObjectId).optional(),
   userId: Joi.string().custom(isValidObjectId).optional(),
   rating: Joi.number().valid(1, 2, 3, 4, 5).optional(),
