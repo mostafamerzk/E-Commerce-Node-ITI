@@ -58,6 +58,7 @@ const user = new mongoose.Schema(
     },
     address: [
       {
+        phone: { type: String, default: "" },
         street: { type: String, default: "" },
         city: { type: String, default: "" },
         country: { type: String, default: "" },

@@ -54,6 +54,7 @@ export const updateProfile = async (req, res, next) => {
           "address.$.city": address.city,
           "address.$.country": address.country,
           "address.$.postalCode": address.postalCode,
+          "address.$.phone": address.phone,
         },
       },
       { runValidators: true },

@@ -9,6 +9,7 @@ export const updateUser = joi
       city: joi.string().trim(),
       country: joi.string().trim(),
       postalCode: joi.string().trim(),
+      phone: joi.string(),
     }),
   })
   .required();
