@@ -4,7 +4,14 @@ import { orderStatus, paymentMethods, paymentStatus } from "../../utils/enums/en
 
 export const getAllUsersSchema = Joi.object({
     page: Joi.number().optional().min(1),
-    limit: Joi.number().optional().min(10).max(30) 
+    limit: Joi.number().optional().min(10).max(100),
+    sort: Joi.string().valid("newest", "oldest", "byRole", "byName").optional(),
+    role: Joi.string().valid("admin", "seller", "user").optional(),
+    isDeleted: Joi.string().valid("true", "false").optional(),
+    isLogged: Joi.string().valid("true", "false").optional(),
+    country: Joi.string().optional(),
+    city: Joi.string().optional(),
+    search: Joi.string().min(2).optional(), 
 });
 export const getByIdSchema = Joi.object({
     id: Joi.string().custom(isValidObjectId).required()
@@ -19,6 +26,7 @@ export const getAllProductsSchema = Joi.object({
     maxPrice: Joi.number().min(0).optional(),
     rating: Joi.number().valid(1,2,3,4,5).optional(),
     inStock: Joi.string().valid("true", "false").optional(),
+    isDeleted: Joi.string().valid("true", "false").optional(),
     search: Joi.string().min(2).optional(),
 });
 export const getAllOrdersSchema = Joi.object({

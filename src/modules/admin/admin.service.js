@@ -8,8 +8,8 @@ import * as bannerFiltersBuilder from "../../utils/banner/build.js";
 import { orderStatus } from "../../utils/enums/enums.js";
 import { cloud } from "../../utils/multer/cloud.config.js";
 import { orderEvent } from "../../utils/email/email.event.js";
+import * as userFiltersBuilder from "../../utils/user/build.js";
 //Admin data Retrival
-
 /**
  * Retrieve all users with pagination and sorted by creation date
  *
@@ -32,13 +32,14 @@ import { orderEvent } from "../../utils/email/email.event.js";
  * // Response: { message: "all users", data: { docs: [...], total: 50, pages: 5, page: 1 } }
  */
 export const getAllUsers = async (req, res, next) => {
+  
   const options = {
     page: req.query.page || 1,
     limit: req.query.limit || 10,
-    sort: { createdAt: -1 },
-  };
-
-  const users = await User.paginate({}, options);
+    sort: userFiltersBuilder.sortObject(req.query.sort),
+  }
+  const filter = userFiltersBuilder.filterObject(req.query);
+  const users = await User.paginate(filter, options);
 
   return res.status(200).json({ message: "all users", data: users });
 };
