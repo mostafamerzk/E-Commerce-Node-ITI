@@ -16,8 +16,9 @@ import {
 } from "./cart.validation.js";
 
 export const cartRouter = new Router();
-
-cartRouter.get("/", isAuthenticated, asyncHandler(getCartItems));
+cartRouter.get("/", 
+  asyncHandler(isAuthenticated), // ✅ زود asyncHandler
+  asyncHandler(getCartItems));
 
 cartRouter.post(
   "/",

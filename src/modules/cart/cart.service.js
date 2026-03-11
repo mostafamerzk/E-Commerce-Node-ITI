@@ -4,8 +4,9 @@ import { Product } from "../../DB/Models/product.js";
 export const getCartItems = async (req, res) => {
   const cart = await Cart.findOne({ userId: req.user._id });
   if (!cart) {
-    return res.status(400).json({
-      message: "Cart Not Found",
+    return res.status(200).json({ // ✅ 200 مش 400
+      message: "Cart is empty",
+      cart: { products: [] },
     });
   }
   await cart.populate({

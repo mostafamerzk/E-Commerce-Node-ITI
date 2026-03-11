@@ -9,8 +9,9 @@ import { asyncHandler } from "../../utils/error handling/asyncHandler.js";
 const wishlistRouter=express.Router()
 
 wishlistRouter.get('/user/wishlist',
-    isAuthenticated,
-asyncHandler(getwishlist))
+    asyncHandler(isAuthenticated), // ✅ زود asyncHandler
+    asyncHandler(getwishlist))
+
 
 wishlistRouter.post('/user/wishlist/:productId',
     isAuthenticated,
