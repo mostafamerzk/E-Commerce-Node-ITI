@@ -10,7 +10,7 @@ import {
 import { orderEvent } from "../../utils/email/email.event.js";
 
 export const getCheckoutSummary = async (req, res, next) => {
-  const cart = await Cart.findOne({ userId: req.user._id });
+  const cart = await Cart.findOne({ userId: req.user._id }); 
   if (!cart || cart.products.length === 0) {
     return next(new Error("Cart is empty", { cause: 400 }));
   }

@@ -24,6 +24,14 @@ userRouter
     validation(userSchema.updateUser),
     asyncHandler(userService.updateProfile),
   );
+  userRouter
+  .route("/profile/updateAddress")
+  .patch(
+    asyncHandler(isAuthenticated),
+    isAuthorized(roles.user),
+    validation(userSchema.updateAddress),
+    asyncHandler(userService.updateAddress),
+  );
 userRouter
   .route("/profile/image")
   .post(

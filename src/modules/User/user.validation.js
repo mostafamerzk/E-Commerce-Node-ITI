@@ -19,3 +19,12 @@ export const changePassword = joi
     confirmPassword: joi.string().valid(joi.ref("newPassword")).required(),
   })
   .required();
+
+  export const updateAddress = {
+    body: Joi.object({
+      street:  Joi.string().required(),
+      city:    Joi.string().required(),
+      zipCode: Joi.string().optional(),
+      country: Joi.string().required(),
+    }),
+  };
